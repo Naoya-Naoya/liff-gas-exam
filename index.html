@@ -1,159 +1,220 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Ultimate CORS Test</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .success { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
-        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
-        button { margin: 5px; padding: 10px 20px; font-size: 16px; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>LIFF GAS Test App (CORS Fixed)</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: blue; }
+    .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
-    <h1>Ultimate CORS Test</h1>
+  <h1>LIFF GAS Test (CORS Fixed)</h1>
+  
+  <div class="result">
+    <h3>接続状況:</h3>
+    <p id="connectionStatus">初期化中...</p>
+  </div>
+  
+  <div class="result">
+    <h3>ユーザー情報:</h3>
+    <p>ユーザー名: <span id="userName">未取得</span></p>
+    <p>ユーザーID: <span id="userId">未取得</span></p>
+    <p>プロフィール画像: <img id="userPicture" width="50" height="50" alt="画像なし"></p>
+  </div>
+  
+  <div class="result">
+    <h3>GAS通信結果:</h3>
+    <p id="gasResult">待機中...</p>
+  </div>
+  
+  <div style="margin: 20px 0;">
+    <button onclick="testConnection()">接続テスト</button>
+    <button onclick="sendViaGet()">GET方式で送信</button>
+    <button onclick="sendViaPost()">POST方式で送信</button>
+  </div>
+  
+  <script>
+    // GAS WebアプリURL（新しいデプロイURLに更新してください）
+    const gasUrl = "https://script.google.com/macros/s/AKfycbyAfBnuRrW_iiZJO0Q9dQkQjAvDV03Ha4LTEKDkbcvlGdO5GXRG1Isg78YpcKG1STf8/exec";
     
-    <div>
-        <label for="gasUrl">GAS WebアプリURL:</label><br>
-        <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/AKfycbyRRFJNT3Rkv7wuTXZGbcqaAzFQpNl9wbBNRmZXwzf6ksLvZkgQcPFNGPMIG7DsVauw/exec" style="width: 80%; padding: 5px;">
-        <button onclick="setUrl()">URL設定</button>
-    </div>
+    let userProfile = null;
     
-    <div style="margin: 20px 0;">
-        <button onclick="testDirectAccess()">1. 直接アクセステストWW</button>
-        <button onclick="testGet()">2. GETテスト</button>
-        <button onclick="testPost()">3. POSTテスト</button>
-        <button onclick="clearResults()">結果クリア</button>
-    </div>
+    async function initializeLiff() {
+      const statusElement = document.getElementById('connectionStatus');
+      
+      try {
+        statusElement.innerHTML = '<span class="info">LIFF初期化中...</span>';
+        
+        await liff.init({ liffId: "2007507724-jxmBZwP0" });
+        
+        if (!liff.isLoggedIn()) {
+          statusElement.innerHTML = '<span class="info">ログインが必要です。ログイン画面に移動します...</span>';
+          liff.login();
+          return;
+        }
+        
+        // プロフィール取得
+        userProfile = await liff.getProfile();
+        
+        // ページに表示
+        document.getElementById('userName').textContent = userProfile.displayName;
+        document.getElementById('userId').textContent = userProfile.userId;
+        
+        if (userProfile.pictureUrl) {
+          document.getElementById('userPicture').src = userProfile.pictureUrl;
+          document.getElementById('userPicture').alt = "プロフィール画像";
+        }
+        
+        statusElement.innerHTML = '<span class="success">✅ LIFF初期化完了・ログイン済み</span>';
+        
+      } catch (e) {
+        console.error("LIFF initialization failed", e);
+        statusElement.innerHTML = '<span class="error">❌ LIFF初期化エラー: ' + e.message + '</span>';
+      }
+    }
     
-    <div id="results"></div>
+    async function testConnection() {
+      const resultElement = document.getElementById('gasResult');
+      
+      if (gasUrl.includes("YOUR_NEW")) {
+        resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+        return;
+      }
+      
+      try {
+        resultElement.innerHTML = '<span class="info">接続テスト中...</span>';
+        
+        const response = await fetch(gasUrl, {
+          method: 'GET',
+          redirect: 'follow' // 重要: リダイレクトに従う
+        });
+        
+        const text = await response.text();
+        resultElement.innerHTML = '<span class="success">✅ 接続成功: ' + text + '</span>';
+        
+      } catch (error) {
+        console.error('Connection test failed:', error);
+        resultElement.innerHTML = '<span class="error">❌ 接続エラー: ' + error.message + '</span>';
+      }
+    }
     
-    <script>
-        let currentGasUrl = '';
+    async function sendViaGet() {
+      const resultElement = document.getElementById('gasResult');
+      
+      if (!userProfile) {
+        resultElement.innerHTML = '<span class="error">❌ まずLIFFでログインしてください</span>';
+        return;
+      }
+      
+      if (gasUrl.includes("YOUR_NEW")) {
+        resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+        return;
+      }
+      
+      try {
+        resultElement.innerHTML = '<span class="info">GET方式でデータ送信中...</span>';
         
-        function setUrl() {
-            const urlInput = document.getElementById('gasUrl');
-            currentGasUrl = urlInput.value.trim();
-            
-            if (!currentGasUrl) {
-                addResult('❌ URLを入力してください', 'error');
-                return;
-            }
-            
-            if (!currentGasUrl.includes('script.google.com')) {
-                addResult('❌ 正しいGAS WebアプリURLを入力してください', 'error');
-                return;
-            }
-            
-            addResult(`✅ URL設定完了: ${currentGasUrl}`, 'success');
-        }
+        // URLパラメータでデータを送信（CORS問題を完全回避）
+        const params = new URLSearchParams({
+          type: 'profileData',
+          displayName: userProfile.displayName,
+          userId: userProfile.userId,
+          pictureUrl: userProfile.pictureUrl || ''
+        });
         
-        function addResult(message, type = '') {
-            const resultsDiv = document.getElementById('results');
-            const div = document.createElement('div');
-            div.className = `test-result ${type}`;
-            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
-            resultsDiv.appendChild(div);
-            resultsDiv.scrollTop = resultsDiv.scrollHeight;
-        }
+        const response = await fetch(`${gasUrl}?${params}`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
         
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-        }
+        const text = await response.text();
+        resultElement.innerHTML = '<span class="success">✅ GET送信成功: ' + text + '</span>';
         
-        function testDirectAccess() {
-            if (!currentGasUrl) {
-                addResult('❌ まずURLを設定してください', 'error');
-                return;
-            }
-            
-            addResult(`🔗 直接アクセステスト: ${currentGasUrl}`);
-            addResult('ℹ️ 新しいタブでURLを開きます。「CORS TEST SUCCESS - GET WORKING」が表示されるか確認してください。');
-            window.open(currentGasUrl, '_blank');
-        }
+      } catch (error) {
+        console.error('GET send failed:', error);
+        resultElement.innerHTML = '<span class="error">❌ GET送信エラー: ' + error.message + '</span>';
+      }
+    }
+    
+    async function sendViaPost() {
+      const resultElement = document.getElementById('gasResult');
+      
+      if (!userProfile) {
+        resultElement.innerHTML = '<span class="error">❌ まずLIFFでログインしてください</span>';
+        return;
+      }
+      
+      if (gasUrl.includes("YOUR_NEW")) {
+        resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+        return;
+      }
+      
+      try {
+        resultElement.innerHTML = '<span class="info">POST方式でデータ送信中...</span>';
         
-        async function testGet() {
-            if (!currentGasUrl) {
-                addResult('❌ まずURLを設定してください', 'error');
-                return;
-            }
-            
-            addResult('🚀 GETテスト開始...');
-            
-            try {
-                const response = await fetch(currentGasUrl, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                console.log('GET Response:', response);
-                console.log('GET Status:', response.status);
-                console.log('GET Headers:', [...response.headers.entries()]);
-                
-                const text = await response.text();
-                
-                if (response.ok) {
-                    addResult(`✅ GET成功 (${response.status}): ${text}`, 'success');
-                    
-                    // CORSヘッダーの確認
-                    const corsHeader = response.headers.get('access-control-allow-origin');
-                    if (corsHeader) {
-                        addResult(`✅ CORSヘッダー確認: ${corsHeader}`, 'success');
-                    } else {
-                        addResult('⚠️ CORSヘッダーが見つかりません', 'error');
-                    }
-                } else {
-                    addResult(`❌ GET失敗 (${response.status}): ${text}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('GET Error:', error);
-                addResult(`❌ GETエラー: ${error.message}`, 'error');
-            }
-        }
+        const data = {
+          type: 'profileData',
+          displayName: userProfile.displayName,
+          userId: userProfile.userId,
+          pictureUrl: userProfile.pictureUrl || ''
+        };
         
-        async function testPost() {
-            if (!currentGasUrl) {
-                addResult('❌ まずURLを設定してください', 'error');
-                return;
-            }
-            
-            addResult('🚀 POSTテスト開始...');
-            
-            const testData = {
-                type: 'test',
-                message: 'CORS POSTテスト',
-                timestamp: new Date().toISOString()
-            };
-            
-            try {
-                const response = await fetch(currentGasUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(testData),
-                    mode: 'cors'
-                });
-                
-                console.log('POST Response:', response);
-                console.log('POST Status:', response.status);
-                console.log('POST Headers:', [...response.headers.entries()]);
-                
-                const text = await response.text();
-                
-                if (response.ok) {
-                    addResult(`✅ POST成功 (${response.status}): ${text}`, 'success');
-                } else {
-                    addResult(`❌ POST失敗 (${response.status}): ${text}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('POST Error:', error);
-                addResult(`❌ POSTエラー: ${error.message}`, 'error');
-            }
+        // プリフライトリクエストを回避するためContent-Typeをtext/plainに設定
+        const response = await fetch(gasUrl, {
+          method: 'POST',
+          redirect: 'follow', // 重要: リダイレクトに従う
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8' // プリフライト回避
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const text = await response.text();
+        resultElement.innerHTML = '<span class="success">✅ POST送信成功: ' + text + '</span>';
+        
+      } catch (error) {
+        console.error('POST send failed:', error);
+        
+        // フォールバック: フォーム形式で再試行
+        try {
+          resultElement.innerHTML = '<span class="info">フォーム形式で再試行中...</span>';
+          
+          const formData = new URLSearchParams({
+            type: 'profileData',
+            displayName: userProfile.displayName,
+            userId: userProfile.userId,
+            pictureUrl: userProfile.pictureUrl || ''
+          });
+          
+          const fallbackResponse = await fetch(gasUrl, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: formData
+          });
+          
+          const fallbackText = await fallbackResponse.text();
+          resultElement.innerHTML = '<span class="success">✅ フォーム形式で送信成功: ' + fallbackText + '</span>';
+          
+        } catch (fallbackError) {
+          resultElement.innerHTML = '<span class="error">❌ POST送信エラー: ' + error.message + ' (フォールバックも失敗: ' + fallbackError.message + ')</span>';
         }
-    </script>
+      }
+    }
+    
+    // ページ読み込み時に初期化
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM読み込み完了、LIFF初期化開始');
+      initializeLiff();
+    });
+  </script>
 </body>
 </html>
