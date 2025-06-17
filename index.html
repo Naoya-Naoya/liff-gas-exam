@@ -2,135 +2,65 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>LIFF GAS Test App</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CORS Test</title>
 </head>
 <body>
-  <h1>LIFF GAS Test</h1>
-  <p id="gasResult">GASからのメッセージ:</p>
-  <p>ユーザー名: <span id="userName">未取得</span></p>
-  <p>ユーザーID: <span id="userId">未取得</span></p>
-  <p>プロフィール画像: <img id="userPicture" width="50" height="50" alt="プロフィール画像"></p>
+  <h1>CORS テスト</h1>
+  <div id="results"></div>
+  <button onclick="testGet()">GETテスト</button>
+  <button onclick="testPost()">POSTテスト</button>
   
   <script>
-    async function initializeLiff() {
+    // ⭐ 新しいデプロイURLに更新してください ⭐
+    const gasUrl = "https://script.google.com/macros/s/AKfycbzSM-aP4vNRbgHX00ZRu1Em4HxhHn4po_-53g54F6SmRClu0_Yy-F_gvMnzQ9-F2o8T/exec";
+    
+    async function testGet() {
+      const resultsDiv = document.getElementById('results');
       try {
-        console.log('LIFF初期化開始...');
-        await liff.init({ liffId: "2007507724-jxmBZwP0" });
-        console.log('LIFF初期化完了');
+        console.log('GETテスト開始...');
+        const response = await fetch(gasUrl, {
+          method: 'GET',
+          mode: 'cors'
+        });
         
-        if (!liff.isLoggedIn()) {
-          console.log('ログインが必要です');
-          liff.login();
-        } else {
-          console.log('ログイン済み、プロフィール送信開始');
-          await sendProfileToGas();
-        }
-      } catch (e) {
-        console.error("LIFF initialization failed", e);
-        document.getElementById('gasResult').textContent = 'LIFF初期化エラー: ' + e.message;
+        const text = await response.text();
+        resultsDiv.innerHTML += `<p>✅ GET成功: ${text}</p>`;
+        console.log('GET成功:', text);
+      } catch (error) {
+        resultsDiv.innerHTML += `<p>❌ GETエラー: ${error.message}</p>`;
+        console.error('GETエラー:', error);
       }
     }
-
-    async function sendProfileToGas() {
-      const gasUrl = "https://script.google.com/macros/s/AKfycbzBqjdgGEsTbMYQJXg6THmNdRpNB9iJGgmOZrSIKRqYAhok76oIJ51fnYBX-lYgOBlx/exec";
-      const gasResultElement = document.getElementById('gasResult');
-      const userNameElement = document.getElementById('userName');
-      const userIdElement = document.getElementById('userId');
-      const userPictureElement = document.getElementById('userPicture');
-
+    
+    async function testPost() {
+      const resultsDiv = document.getElementById('results');
       try {
-        console.log('プロフィール取得開始...');
-        const profile = await liff.getProfile();
-        console.log('プロフィール取得完了:', profile);
-        
-        const displayName = profile.displayName;
-        const userId = profile.userId;
-        const pictureUrl = profile.pictureUrl;
-
-        // ページにユーザー情報を表示
-        userNameElement.textContent = displayName;
-        userIdElement.textContent = userId;
-        if (pictureUrl) {
-          userPictureElement.src = pictureUrl;
-          userPictureElement.alt = "プロフィール画像";
-        } else {
-          userPictureElement.alt = "画像なし";
-        }
-
-        // GASに送信するデータを作成
-        const dataToSend = {
-          type: "profileData",
-          displayName: displayName,
-          userId: userId,
-          pictureUrl: pictureUrl
+        console.log('POSTテスト開始...');
+        const testData = {
+          type: 'profileData',
+          displayName: 'テストユーザー',
+          userId: 'test123',
+          pictureUrl: 'https://example.com/test.jpg'
         };
-
-        console.log('GASへのデータ送信開始...', dataToSend);
-
-        // まずGETリクエストでテスト
-        console.log('まずGETテストを実行...');
-        try {
-          const testResponse = await fetch(gasUrl, {
-            method: 'GET',
-            mode: 'cors'
-          });
-          console.log('GETテスト結果:', testResponse.status, await testResponse.text());
-        } catch (testError) {
-          console.log('GETテストエラー:', testError);
-        }
-
-        // GASへPOSTリクエストを送信
-        console.log('POSTリクエスト送信...');
+        
         const response = await fetch(gasUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(dataToSend),
+          body: JSON.stringify(testData),
           mode: 'cors'
         });
-
-        console.log('レスポンス受信:', response.status, response.statusText);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
-        }
-
-        const gasResponseText = await response.text();
-        console.log('GASからのレスポンス:', gasResponseText);
-        gasResultElement.textContent = 'GASからのメッセージ: ' + gasResponseText;
-
-      } catch (e) {
-        console.error("Failed to send profile to GAS", e);
-        gasResultElement.textContent = 'GASへのデータ送信エラー: ' + e.message;
         
-        // エラー時もプロフィール情報は表示する
-        try {
-          if (liff.isLoggedIn()) {
-            const fallbackProfile = await liff.getProfile();
-            userNameElement.textContent = fallbackProfile.displayName || '取得失敗';
-            userIdElement.textContent = fallbackProfile.userId || '取得失敗';
-            if (fallbackProfile.pictureUrl) {
-              userPictureElement.src = fallbackProfile.pictureUrl;
-            }
-          }
-        } catch (profileError) {
-          console.error("Failed to get profile for display after GAS error", profileError);
-          userNameElement.textContent = '取得失敗';
-          userIdElement.textContent = '取得失敗';
-        }
+        const text = await response.text();
+        resultsDiv.innerHTML += `<p>✅ POST成功: ${text}</p>`;
+        console.log('POST成功:', text);
+      } catch (error) {
+        resultsDiv.innerHTML += `<p>❌ POSTエラー: ${error.message}</p>`;
+        console.error('POSTエラー:', error);
       }
     }
-
-    // ページ読み込み時に初期化
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM読み込み完了、LIFF初期化開始');
-      initializeLiff();
-    });
   </script>
 </body>
 </html>
