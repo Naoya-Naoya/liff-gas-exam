@@ -1,71 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CORS Test</title>
+    <meta charset="utf-8">
+    <title>Ultimate CORS Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+    </style>
 </head>
 <body>
-  <h1>CORS テスト</h1>
-  <div id="results"></div>
-  <button onclick="testGet()">GETテスト</button>
-  <button onclick="testPost()">POSTテスト</button>
-  
-  <script>
-    // ⭐ 新しいデプロイURLに更新してください ⭐
-    const gasUrl = "https://script.google.com/macros/s/AKfycbxUsLTbsZ81WkK-iN5pCMS0TN3QwjUjX-7Uxy3rkPkfqAj_xRVeBGyuenCUKdMX6EYm/exec";
+    <h1>Ultimate CORS Test</h1>
     
-    // URLが設定されているかチェック
-    if (gasUrl.includes("YOUR_NEW")) {
-      document.getElementById('results').innerHTML = '<p style="color: red;">❌ GAS URLを設定してください！</p>';
-    }
+    <div>
+        <label for="gasUrl">GAS WebアプリURL:</label><br>
+        <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/AKfycbzH4KYjOWIgqgrC6SPZtf5BMIKXc-fjGGCnvPxsE-ghIfbyd3sWukR7yOOcMsWpO8lI/exec" style="width: 80%; padding: 5px;">
+        <button onclick="setUrl()">URL設定</button>
+    </div>
     
-    async function testGet() {
-      const resultsDiv = document.getElementById('results');
-      try {
-        console.log('GETテスト開始...');
-        const response = await fetch(gasUrl, {
-          method: 'GET',
-          mode: 'cors'
-        });
-        
-        const text = await response.text();
-        resultsDiv.innerHTML += `<p>✅ GET成功: ${text}</p>`;
-        console.log('GET成功:', text);
-      } catch (error) {
-        resultsDiv.innerHTML += `<p>❌ GETエラー: ${error.message}</p>`;
-        console.error('GETエラー:', error);
-      }
-    }
+    <div style="margin: 20px 0;">
+        <button onclick="testDirectAccess()">1. 直接アクセステスト</button>
+        <button onclick="testGet()">2. GETテスト</button>
+        <button onclick="testPost()">3. POSTテスト</button>
+        <button onclick="clearResults()">結果クリア</button>
+    </div>
     
-    async function testPost() {
-      const resultsDiv = document.getElementById('results');
-      try {
-        console.log('POSTテスト開始...');
-        const testData = {
-          type: 'profileData',
-          displayName: 'テストユーザー',
-          userId: 'test123',
-          pictureUrl: 'https://example.com/test.jpg'
-        };
+    <div id="results"></div>
+    
+    <script>
+        let currentGasUrl = '';
         
-        const response = await fetch(gasUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(testData),
-          mode: 'cors'
-        });
+        function setUrl() {
+            const urlInput = document.getElementById('gasUrl');
+            currentGasUrl = urlInput.value.trim();
+            
+            if (!currentGasUrl) {
+                addResult('❌ URLを入力してください', 'error');
+                return;
+            }
+            
+            if (!currentGasUrl.includes('script.google.com')) {
+                addResult('❌ 正しいGAS WebアプリURLを入力してください', 'error');
+                return;
+            }
+            
+            addResult(`✅ URL設定完了: ${currentGasUrl}`, 'success');
+        }
         
-        const text = await response.text();
-        resultsDiv.innerHTML += `<p>✅ POST成功: ${text}</p>`;
-        console.log('POST成功:', text);
-      } catch (error) {
-        resultsDiv.innerHTML += `<p>❌ POSTエラー: ${error.message}</p>`;
-        console.error('POSTエラー:', error);
-      }
-    }
-  </script>
+        function addResult(message, type = '') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function testDirectAccess() {
+            if (!currentGasUrl) {
+                addResult('❌ まずURLを設定してください', 'error');
+                return;
+            }
+            
+            addResult(`🔗 直接アクセステスト: ${currentGasUrl}`);
+            addResult('ℹ️ 新しいタブでURLを開きます。「CORS TEST SUCCESS - GET WORKING」が表示されるか確認してください。');
+            window.open(currentGasUrl, '_blank');
+        }
+        
+        async function testGet() {
+            if (!currentGasUrl) {
+                addResult('❌ まずURLを設定してください', 'error');
+                return;
+            }
+            
+            addResult('🚀 GETテスト開始...');
+            
+            try {
+                const response = await fetch(currentGasUrl, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                console.log('GET Response:', response);
+                console.log('GET Status:', response.status);
+                console.log('GET Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                
+                if (response.ok) {
+                    addResult(`✅ GET成功 (${response.status}): ${text}`, 'success');
+                    
+                    // CORSヘッダーの確認
+                    const corsHeader = response.headers.get('access-control-allow-origin');
+                    if (corsHeader) {
+                        addResult(`✅ CORSヘッダー確認: ${corsHeader}`, 'success');
+                    } else {
+                        addResult('⚠️ CORSヘッダーが見つかりません', 'error');
+                    }
+                } else {
+                    addResult(`❌ GET失敗 (${response.status}): ${text}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('GET Error:', error);
+                addResult(`❌ GETエラー: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPost() {
+            if (!currentGasUrl) {
+                addResult('❌ まずURLを設定してください', 'error');
+                return;
+            }
+            
+            addResult('🚀 POSTテスト開始...');
+            
+            const testData = {
+                type: 'test',
+                message: 'CORS POSTテスト',
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(currentGasUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData),
+                    mode: 'cors'
+                });
+                
+                console.log('POST Response:', response);
+                console.log('POST Status:', response.status);
+                console.log('POST Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                
+                if (response.ok) {
+                    addResult(`✅ POST成功 (${response.status}): ${text}`, 'success');
+                } else {
+                    addResult(`❌ POST失敗 (${response.status}): ${text}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('POST Error:', error);
+                addResult(`❌ POSTエラー: ${error.message}`, 'error');
+            }
+        }
+    </script>
 </body>
 </html>
