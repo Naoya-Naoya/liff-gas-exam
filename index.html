@@ -13,7 +13,12 @@
   
   <script>
     // ⭐ 新しいデプロイURLに更新してください ⭐
-    const gasUrl = "https://script.google.com/macros/s/AKfycbzSM-aP4vNRbgHX00ZRu1Em4HxhHn4po_-53g54F6SmRClu0_Yy-F_gvMnzQ9-F2o8T/exec";
+    const gasUrl = "https://script.google.com/macros/s/AKfycbxUsLTbsZ81WkK-iN5pCMS0TN3QwjUjX-7Uxy3rkPkfqAj_xRVeBGyuenCUKdMX6EYm/exec";
+    
+    // URLが設定されているかチェック
+    if (gasUrl.includes("YOUR_NEW")) {
+      document.getElementById('results').innerHTML = '<p style="color: red;">❌ GAS URLを設定してください！</p>';
+    }
     
     async function testGet() {
       const resultsDiv = document.getElementById('results');
