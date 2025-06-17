@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>LIFF GAS Test App</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
@@ -11,17 +12,20 @@
   <p id="gasResult">GASからのメッセージ:</p>
   <p>ユーザー名: <span id="userName">未取得</span></p>
   <p>ユーザーID: <span id="userId">未取得</span></p>
-  <p>プロフィール画像: <img id="userPicture" width="50" height="50"></p>
-
+  <p>プロフィール画像: <img id="userPicture" width="50" height="50" alt="プロフィール画像"></p>
+  
   <script>
     async function initializeLiff() {
       try {
-        // LIFF IDは既に設定済みなので、そのまま利用します
+        console.log('LIFF初期化開始...');
         await liff.init({ liffId: "2007507724-jxmBZwP0" });
+        console.log('LIFF初期化完了');
+        
         if (!liff.isLoggedIn()) {
+          console.log('ログインが必要です');
           liff.login();
         } else {
-          // ログイン済みであればプロフィールを取得してGASに送信
+          console.log('ログイン済み、プロフィール送信開始');
           await sendProfileToGas();
         }
       } catch (e) {
@@ -31,7 +35,6 @@
     }
 
     async function sendProfileToGas() {
-      // GASのWebアプリURLは既に設定済みなので、そのまま利用します
       const gasUrl = "https://script.google.com/macros/s/AKfycbzHbfp1dpRj_0dwa9PE4aMwBIitMBx_-c4bKSHJc87XxPf_zBkO1ZATfs3ghoVU243p/exec";
       const gasResultElement = document.getElementById('gasResult');
       const userNameElement = document.getElementById('userName');
@@ -39,8 +42,10 @@
       const userPictureElement = document.getElementById('userPicture');
 
       try {
-        // LIFFからユーザープロフィールを取得
+        console.log('プロフィール取得開始...');
         const profile = await liff.getProfile();
+        console.log('プロフィール取得完了:', profile);
+        
         const displayName = profile.displayName;
         const userId = profile.userId;
         const pictureUrl = profile.pictureUrl;
@@ -49,59 +54,71 @@
         userNameElement.textContent = displayName;
         userIdElement.textContent = userId;
         if (pictureUrl) {
-            userPictureElement.src = pictureUrl;
-            userPictureElement.alt = "プロフィール画像"; // 画像が読み込めなかった場合の代替テキスト
+          userPictureElement.src = pictureUrl;
+          userPictureElement.alt = "プロフィール画像";
         } else {
-            userPictureElement.alt = "画像なし";
+          userPictureElement.alt = "画像なし";
         }
 
         // GASに送信するデータを作成
         const dataToSend = {
-          type: "profileData", // GAS側で何のデータか識別できるようにする（任意）
+          type: "profileData",
           displayName: displayName,
           userId: userId,
           pictureUrl: pictureUrl
         };
 
-        // GASへPOSTリクエストを送信
+        console.log('GASへのデータ送信開始...', dataToSend);
+
+        // GASへPOSTリクエストを送信（より詳細なエラーハンドリング付き）
         const response = await fetch(gasUrl, {
-          method: 'POST', // POSTメソッドを指定
+          method: 'POST',
           headers: {
-            'Content-Type': 'application/json' // JSON形式で送信することを明示
+            'Content-Type': 'application/json',
+            'Accept': 'text/plain'
           },
-          body: JSON.stringify(dataToSend) // オブジェクトをJSON文字列に変換して送信
+          body: JSON.stringify(dataToSend),
+          mode: 'cors' // 明示的にCORSモードを指定
         });
 
+        console.log('レスポンス受信:', response.status, response.statusText);
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
         }
+
         const gasResponseText = await response.text();
+        console.log('GASからのレスポンス:', gasResponseText);
         gasResultElement.textContent = 'GASからのメッセージ: ' + gasResponseText;
 
       } catch (e) {
         console.error("Failed to send profile to GAS", e);
         gasResultElement.textContent = 'GASへのデータ送信エラー: ' + e.message;
-        // エラー時も可能な限りユーザー情報を表示できるようにする
-        // liff.getProfile()は同期的に呼べないので、try-catchで囲む
+        
+        // エラー時もプロフィール情報は表示する
         try {
-            const currentProfile = liff.getProfile(); // エラー発生時でも情報が取得できる場合がある
-            userNameElement.textContent = currentProfile.displayName || '取得失敗';
-            userIdElement.textContent = currentProfile.userId || '取得失敗';
-            if (currentProfile.pictureUrl) {
-                userPictureElement.src = currentProfile.pictureUrl;
-            } else {
-                userPictureElement.alt = "画像なし";
+          if (liff.isLoggedIn()) {
+            const fallbackProfile = await liff.getProfile();
+            userNameElement.textContent = fallbackProfile.displayName || '取得失敗';
+            userIdElement.textContent = fallbackProfile.userId || '取得失敗';
+            if (fallbackProfile.pictureUrl) {
+              userPictureElement.src = fallbackProfile.pictureUrl;
             }
+          }
         } catch (profileError) {
-            console.error("Failed to get profile for display after GAS error", profileError);
-            userNameElement.textContent = '取得失敗';
-            userIdElement.textContent = '取得失敗';
-            userPictureElement.alt = '取得失敗';
+          console.error("Failed to get profile for display after GAS error", profileError);
+          userNameElement.textContent = '取得失敗';
+          userIdElement.textContent = '取得失敗';
         }
       }
     }
 
-    initializeLiff();
+    // ページ読み込み時に初期化
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM読み込み完了、LIFF初期化開始');
+      initializeLiff();
+    });
   </script>
 </body>
 </html>
