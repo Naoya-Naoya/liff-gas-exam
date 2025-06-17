@@ -35,7 +35,7 @@
     }
 
     async function sendProfileToGas() {
-      const gasUrl = "https://script.google.com/macros/s/AKfycbw2OHWupU4jRihx6aih5Ys3TJaMnvmcdNVPlNbKyudofRF0YkKZDvMhdnQBAoLwYnji/exec";
+      const gasUrl = "https://script.google.com/macros/s/AKfycbzBqjdgGEsTbMYQJXg6THmNdRpNB9iJGgmOZrSIKRqYAhok76oIJ51fnYBX-lYgOBlx/exec";
       const gasResultElement = document.getElementById('gasResult');
       const userNameElement = document.getElementById('userName');
       const userIdElement = document.getElementById('userId');
@@ -70,15 +70,27 @@
 
         console.log('GASへのデータ送信開始...', dataToSend);
 
-        // GASへPOSTリクエストを送信（より詳細なエラーハンドリング付き）
+        // まずGETリクエストでテスト
+        console.log('まずGETテストを実行...');
+        try {
+          const testResponse = await fetch(gasUrl, {
+            method: 'GET',
+            mode: 'cors'
+          });
+          console.log('GETテスト結果:', testResponse.status, await testResponse.text());
+        } catch (testError) {
+          console.log('GETテストエラー:', testError);
+        }
+
+        // GASへPOSTリクエストを送信
+        console.log('POSTリクエスト送信...');
         const response = await fetch(gasUrl, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'text/plain'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(dataToSend),
-          mode: 'cors' // 明示的にCORSモードを指定
+          mode: 'cors'
         });
 
         console.log('レスポンス受信:', response.status, response.statusText);
