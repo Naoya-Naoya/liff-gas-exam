@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>LIFF GAS Test App</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>LIFF GAS Test</h1>
+  <p id="gasResult">GASからのメッセージ:</p>
+
+  <script>
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: "YOUR_LIFF_ID" }); // ここにLIFF IDを設定します
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          fetchGasData();
+        }
+      } catch (e) {
+        console.error("LIFF initialization failed", e);
+        document.getElementById('gasResult').textContent = 'LIFF初期化エラー: ' + e.message;
+      }
+    }
+
+    async function fetchGasData() {
+      const gasUrl = "YOUR_GAS_WEB_APP_URL"; // ここに先ほどコピーしたGASのWebアプリURLを設定します
+      try {
+        const response = await fetch(gasUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.text();
+        document.getElementById('gasResult').textContent = 'GASからのメッセージ: ' + data;
+      } catch (e) {
+        console.error("GAS fetch failed", e);
+        document.getElementById('gasResult').textContent = 'GASデータ取得エラー: ' + e.message;
+      }
+    }
+
+    initializeLiff();
+  </script>
+</body>
+</html>
