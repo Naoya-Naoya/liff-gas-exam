@@ -1,0 +1,447 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    width: 100%;
+    max-width: 100vw;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 20px; 
+}
+
+.header {
+    background: linear-gradient(90deg, #00B900, #00D300);
+    color: white;
+    padding: 15px;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.header-left {
+    flex: 1;
+    text-align: left;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.progress-section {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.progress-bar {
+    background: rgba(255,255,255,0.3);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    background: white;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-text {
+    font-size: 14px;
+    opacity: 0.9;
+    text-align: center;
+}
+
+/* メインコンテンツエリア */
+.main-content {
+    padding: 20px 15px;
+    width: 100%;
+}
+
+/* 初期化画面 */
+.loading-screen {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.loading-screen h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.loading-screen p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* クイズ画面 */
+.quiz-screen {
+    display: none;
+}
+
+.question-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.question-text {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #333;
+    font-weight: 500;
+    text-align: center;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.option-button {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    touch-action: manipulation;
+}
+
+.option-button:hover:not(:disabled) {
+    border-color: #00B900;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,185,0,0.3);
+}
+
+.option-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.option-button.correct {
+    background: #e8f5e8;
+    border-color: #4caf50;
+    color: #2e7d32;
+}
+
+.option-button.incorrect {
+    background: #ffebee;
+    border-color: #f44336;
+    color: #c62828;
+}
+
+.feedback {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.feedback.show {
+    opacity: 1;
+}
+
+.feedback.correct {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.feedback.incorrect {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #f44336;
+}
+
+.next-button {
+    background: linear-gradient(90deg, #00B900, #00D300);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    margin-right: 20px;
+    transition: all 0.2s ease;
+    display: none;
+    touch-action: manipulation;
+}
+
+.next-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,185,0,0.3);
+}
+
+.next-button:active {
+    transform: translateY(0);
+}
+
+/* 完了画面 */
+.completion-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.completion-emoji {
+    font-size: 80px;
+    margin-bottom: 30px;
+}
+
+.completion-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #00B900;
+    margin-bottom: 16px;
+}
+
+.completion-text {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.restart-button {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+}
+
+.restart-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102,126,234,0.3);
+}
+
+.restart-button:active {
+    transform: translateY(0);
+}
+
+/* ローディング */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 1.2em;
+    color: #666;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #00B900;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* エラー画面 */
+.error-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.error-screen h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #f44336;
+    margin-bottom: 20px;
+}
+
+.error-screen p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .header {
+        padding: 12px;
+    }
+    
+    .header h1 {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+    
+    .user-info {
+        gap: 6px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .user-name {
+        font-size: 13px;
+    }
+    
+    .question-text {
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+    
+    .options-container {
+        padding: 0 30px;
+    }
+    
+    .option-button {
+        padding: 18px 24px;
+        font-size: 18px;
+        min-height: 60px;
+    }
+    
+    .next-button {
+        padding: 18px 32px;
+        font-size: 18px;
+        margin: 20px 30px 0 30px;
+        width: calc(100% - 60px);
+    }
+    
+    .feedback {
+        font-size: 16px;
+        margin: 20px 30px;
+        width: calc(100% - 60px);
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .user-name {
+        font-size: 12px;
+    }
+    
+    .question-text {
+        font-size: 20px;
+    }
+    
+    .options-container {
+        padding: 0 25px;
+    }
+    
+    .option-button {
+        padding: 16px 20px;
+        font-size: 17px;
+        min-height: 56px;
+    }
+    
+    .next-button {
+        margin: 20px 25px 0 25px;
+        width: calc(100% - 50px);
+        font-size: 17px;
+    }
+    
+    .feedback {
+        margin: 20px 25px;
+        width: calc(100% - 50px);
+        font-size: 15px;
+    }
+    
+    .question-image {
+        height: 160px;
+        margin-bottom: 15px;
+    }
+}
