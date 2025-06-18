@@ -174,19 +174,22 @@ function selectAnswer(selectedAnswer) {
     });
 
     const feedbackElement = document.getElementById('feedback');
-    feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'} show`;
-    feedbackElement.textContent = isCorrect ? 'ถูกต้อง!' : `ไม่ถูกต้อง คำตอบที่ถูกต้องคือ "${question.correctAnswer}"`;
-
     if (isCorrect) {
+        feedbackElement.className = 'feedback correct show';
+        feedbackElement.textContent = 'ถูกต้อง!';
         correctAnswersCount++;
+        // GASに回答データを送信（オプション）
+        if (userProfile && gasUrl) {
+            sendAnswerToGAS(selectedAnswer, isCorrect);
+        }
+        document.getElementById('nextButton').style.display = 'block';
+    } else {
+        feedbackElement.className = 'feedback incorrect show';
+        feedbackElement.textContent = '不正解です。もう一度選んでください';
+        setTimeout(() => {
+            showQuestion();
+        }, 1200); // 1.2秒後に再表示
     }
-
-    // GASに回答データを送信（オプション）
-    if (userProfile && gasUrl) {
-        sendAnswerToGAS(selectedAnswer, isCorrect);
-    }
-
-    document.getElementById('nextButton').style.display = 'block';
 }
 
 // 次の問題
