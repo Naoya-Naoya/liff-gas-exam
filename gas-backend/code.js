@@ -1,4 +1,4 @@
-// code.gs from Cursor 
+// code.gs from Cursor AAAA
 
 function doGet(e) {
   // GETリクエストの処理
