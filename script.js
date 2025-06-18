@@ -171,9 +171,6 @@ function selectAnswer(selectedAnswer) {
         if (button.textContent === selectedAnswer) {
             button.classList.add(isCorrect ? 'correct' : 'incorrect');
         }
-        if (!isCorrect && button.textContent === question.correctAnswer) {
-            button.classList.add('correct');
-        }
     });
 
     const feedbackElement = document.getElementById('feedback');
