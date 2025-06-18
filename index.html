@@ -2,11 +2,12 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบทดสอบวันนี้ (LIFF対応)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>LIFF GAS Test App with Quiz UI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
+        /* １つ目のコードのスタイルをそのまま適用 */
         * {
             margin: 0;
             padding: 0;
@@ -105,109 +106,60 @@
             text-align: center;
         }
 
-        .question-area {
+        /* テスト結果表示エリア（２つ目のコードから） */
+        .test-results {
             padding: 20px 15px;
             width: 100%;
         }
 
-        .question-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .result {
+            margin: 10px 0;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
             border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white;
         }
 
-        .question-text {
+        .result h3 {
             font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 30px;
+            font-weight: 600;
             color: #333;
-            font-weight: 500;
-            text-align: center;
+            margin-bottom: 10px;
         }
 
-        .options-container {
+        .result p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .success {
+            color: #4caf50;
+            font-weight: 500;
+        }
+
+        .error {
+            color: #f44336;
+            font-weight: 500;
+        }
+
+        .info {
+            color: #2196f3;
+            font-weight: 500;
+        }
+
+        /* ボタンスタイル（１つ目のコードから） */
+        .test-buttons {
             display: flex;
             flex-direction: column;
             gap: 12px;
             width: 100%;
             padding: 0 20px;
-        }
-
-        .option-button {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 16px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            min-height: 56px;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            touch-action: manipulation;
-        }
-
-        .option-button:hover:not(:disabled) {
-            border-color: #00B900;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,185,0,0.3);
-        }
-
-        .option-button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .option-button.correct {
-            background: #e8f5e8;
-            border-color: #4caf50;
-            color: #2e7d32;
-        }
-
-        .option-button.incorrect {
-            background: #ffebee;
-            border-color: #f44336;
-            color: #c62828;
-        }
-
-        .feedback {
             margin-top: 20px;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-            opacity: 0;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
-            margin-left: 20px;
-            margin-right: 20px;
-            width: calc(100% - 40px);
         }
 
-        .feedback.show {
-            opacity: 1;
-        }
-
-        .feedback.correct {
-            background: #e8f5e8;
-            color: #2e7d32;
-            border: 1px solid #4caf50;
-        }
-
-        .feedback.incorrect {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #f44336;
-        }
-
-        .next-button {
+        .test-button {
             background: linear-gradient(90deg, #00B900, #00D300);
             color: white;
             border: none;
@@ -216,82 +168,34 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
             transition: all 0.2s ease;
-            display: none;
             touch-action: manipulation;
-            box-sizing: border-box;
-            margin-left: 20px;
-            margin-right: 20px;
-            width: calc(100% - 40px);
+            width: 100%;
         }
 
-        .next-button:hover {
+        .test-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,185,0,0.3);
         }
 
-        .next-button:active {
+        .test-button:active {
             transform: translateY(0);
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-            font-size: 1.2em;
-            color: #666;
-            flex-direction: column;
-            gap: 10px;
+        .test-button.secondary {
+            background: linear-gradient(90deg, #667eea, #764ba2);
         }
 
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #00B900;
+        /* プロフィール画像表示 */
+        .profile-image {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            border: 2px solid #e0e0e0;
+            object-fit: cover;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Connection status indicator */
-        .connection-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .connection-status.connecting {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .connection-status.connected {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .connection-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* レスポンシブデザイン */
+        /* スマホ対応 */
         @media (max-width: 768px) {
             .container {
                 box-shadow: none;
@@ -323,36 +227,25 @@
                 font-size: 13px;
             }
             
-            .question-area {
+            .test-results {
                 padding: 20px 15px;
             }
             
-            .question-text {
-                font-size: 22px;
-                margin-bottom: 30px;
+            .result h3 {
+                font-size: 16px;
             }
             
-            .options-container {
+            .result p {
+                font-size: 13px;
+            }
+            
+            .test-buttons {
                 padding: 0 30px;
             }
             
-            .option-button {
-                padding: 18px 24px;
-                font-size: 18px;
-                min-height: 60px;
-            }
-            
-            .next-button {
+            .test-button {
                 padding: 18px 32px;
                 font-size: 18px;
-                margin: 20px 30px 0 30px;
-                width: calc(100% - 60px);
-            }
-            
-            .feedback {
-                font-size: 16px;
-                margin: 20px 30px;
-                width: calc(100% - 60px);
             }
         }
 
@@ -382,430 +275,288 @@
                 font-size: 12px;
             }
             
-            .question-text {
-                font-size: 20px;
-            }
-            
-            .options-container {
+            .test-buttons {
                 padding: 0 25px;
             }
             
-            .option-button {
+            .test-button {
                 padding: 16px 20px;
                 font-size: 17px;
-                min-height: 56px;
             }
             
-            .next-button {
-                margin: 20px 25px 0 25px;
-                width: calc(100% - 50px);
-                font-size: 17px;
-            }
-            
-            .feedback {
-                margin: 20px 25px;
-                width: calc(100% - 50px);
+            .result h3 {
                 font-size: 15px;
             }
             
-            .question-image {
-                height: 160px;
-                margin-bottom: 15px;
-            }
-        }
-
-        @media (max-height: 500px) and (orientation: landscape) {
-            .question-image {
-                height: 120px;
-            }
-            
-            .question-area {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 10px;
-            }
-            
-            .options-container {
-                gap: 8px;
-            }
-            
-            .option-button {
-                min-height: 44px;
-                padding: 10px 14px;
+            .result p {
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Connection status indicator -->
-    <div class="connection-status connecting" id="connectionStatus">初期化中...</div>
-
     <div class="container">
+        <!-- １つ目のコードのヘッダーUIを適用 -->
         <div class="header">
             <div class="header-left">
-                <h1>แบบทดสอบวันนี้</h1>
+                <h1>LIFF GAS Test (Quiz UI)</h1>
             </div>
             <div class="user-info">
-                <div class="user-name" id="userName">กำลังโหลด...</div>
+                <div class="user-name" id="userName">未取得</div>
                 <img class="user-avatar" src="https://placehold.co/100x100/4CAF50/FFFFFF?text=U" alt="อวตาร" id="userAvatar">
             </div>
             <div class="progress-section" id="progressSection">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="progress-text" id="progressText">ข้อ 0 / 0</div>
+                <div class="progress-text" id="progressText">テスト進行状況</div>
             </div>
         </div>
 
-        <div class="question-area" id="questionArea">
-            <div class="loading" id="loadingIndicator">
-                <div class="loading-spinner"></div>
-                กำลังโหลดคำถาม...
+        <!-- テスト結果表示エリア -->
+        <div class="test-results">
+            <div class="result">
+                <h3>接続状況:</h3>
+                <p id="connectionStatus">初期化中...</p>
+            </div>
+            
+            <div class="result">
+                <h3>ユーザー情報:</h3>
+                <p>ユーザー名: <span id="userNameDetail">未取得</span></p>
+                <p>ユーザーID: <span id="userId">未取得</span></p>
+                <p>プロフィール画像: <img id="userPicture" class="profile-image" alt="画像なし"></p>
+            </div>
+            
+            <div class="result">
+                <h3>GAS通信結果:</h3>
+                <p id="gasResult">待機中...</p>
+            </div>
+
+            <!-- テストボタン -->
+            <div class="test-buttons">
+                <button class="test-button" onclick="testConnection()">接続テスト</button>
+                <button class="test-button secondary" onclick="sendViaGet()">GET方式で送信</button>
+                <button class="test-button secondary" onclick="sendViaPost()">POST方式で送信</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        console.log('JavaScript กำลังทำงาน...');
-
-        // LIFF設定
-        const LIFF_ID = '2007507724-jxmBZwP0'; // 2つ目のコードから取得
-
-        // GAS WebアプリURL（統合：どちらも同じものを使用）
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyAfBnuRrW_iiZJO0Q9dQkQjAvDV03Ha4LTEKDkbcvlGdO5GXRG1Isg78YpcKG1STf8/exec";
-
-        // グローバル変数
-        let currentUser = null;
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let correctAnswersCount = 0;
-        let isAnswerSubmitted = false;
-
-        // 接続状況を更新する関数
-        function updateConnectionStatus(status, message) {
-            const statusElement = document.getElementById('connectionStatus');
-            statusElement.className = `connection-status ${status}`;
-            statusElement.textContent = message;
-            
-            // 5秒後に自動的に隠す（接続完了時のみ）
-            if (status === 'connected') {
-                setTimeout(() => {
-                    statusElement.style.opacity = '0';
-                    setTimeout(() => statusElement.style.display = 'none', 300);
-                }, 3000);
-            }
+    <script>
+        // ２つ目のコードのJavaScript機能をそのまま維持
+        // GAS WebアプリURL（新しいデプロイURLに更新してください）
+        const gasUrl = "https://script.google.com/macros/s/AKfycbyAfBnuRrW_iiZJO0Q9dQkQjAvDV03Ha4LTEKDkbcvlGdO5GXRG1Isg78YpcKG1STf8/exec";
+        
+        let userProfile = null;
+        
+        // プログレスバーを更新する関数（新規追加）
+        function updateProgress(percentage, text) {
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = text;
         }
-
-        // ユーザー情報をヘッダーに設定
-        function setUserInfo(name, avatarUrl) {
-            console.log('ตั้งค่าข้อมูลผู้ใช้:', name, avatarUrl);
-            const userNameElement = document.getElementById('userName');
-            const userAvatarElement = document.getElementById('userAvatar');
-            
-            if (userNameElement) {
-                userNameElement.textContent = name;
-            }
-            if (userAvatarElement) {
-                userAvatarElement.src = avatarUrl || 'https://placehold.co/100x100/4CAF50/FFFFFF?text=U'; 
-                userAvatarElement.onerror = () => {
-                    userAvatarElement.src = 'https://placehold.co/100x100/4CAF50/FFFFFF?text=U'; 
+        
+        // ユーザー情報をヘッダーに設定（新規追加）
+        function updateHeaderUserInfo(name, avatarUrl) {
+            document.getElementById('userName').textContent = name;
+            const avatarElement = document.getElementById('userAvatar');
+            if (avatarUrl) {
+                avatarElement.src = avatarUrl;
+                avatarElement.onerror = () => {
+                    avatarElement.src = 'https://placehold.co/100x100/4CAF50/FFFFFF?text=U';
                 };
             }
         }
-
-        // フォールバックユーザー生成（テスト用）
-        function generateFallbackUser() {
-            const timestamp = Date.now();
-            return {
-                id: `test_user_${timestamp}`,
-                name: 'ผู้ทดสอบ',
-                picture: 'https://placehold.co/100x100/FF5733/FFFFFF?text=Test'
-            };
-        }
-
-        // LIFF初期化とユーザー情報取得（統合版）
-        async function fetchCurrentUser() {
-            console.log('=== เริ่มต้นกระบวนการดึงข้อมูลผู้ใช้ (LIFF) ===');
-            updateConnectionStatus('connecting', 'LIFF初期化中...');
+        
+        async function initializeLiff() {
+            const statusElement = document.getElementById('connectionStatus');
             
             try {
-                // LIFF環境チェック
-                if (typeof liff !== 'undefined') {
-                    console.log('LIFF SDK が利用可能です');
-                    
-                    // LIFF初期化
-                    await liff.init({ liffId: LIFF_ID });
-                    console.log('LIFF初期化成功');
-                    
-                    if (!liff.isLoggedIn()) {
-                        console.log('ユーザーがログインしていません。ログイン画面に移動します。');
-                        updateConnectionStatus('connecting', 'ログインが必要です...');
-                        liff.login({ redirectUri: window.location.href });
-                        return null;
-                    }
-                    
-                    // プロフィール取得
-                    const profile = await liff.getProfile();
-                    currentUser = {
-                        id: profile.userId,
-                        name: profile.displayName,
-                        picture: profile.pictureUrl
-                    };
-                    console.log('✅ LIFF プロフィール取得成功:', currentUser);
-                    updateConnectionStatus('connected', 'ログイン済み');
-                    
-                } else {
-                    throw new Error('LIFF SDK が利用できません');
+                statusElement.innerHTML = '<span class="info">LIFF初期化中...</span>';
+                updateProgress(20, 'LIFF初期化中...');
+                
+                await liff.init({ liffId: "2007507724-jxmBZwP0" });
+                updateProgress(40, 'LIFF初期化完了');
+                
+                if (!liff.isLoggedIn()) {
+                    statusElement.innerHTML = '<span class="info">ログインが必要です。ログイン画面に移動します...</span>';
+                    updateProgress(50, 'ログインが必要です...');
+                    liff.login();
+                    return;
                 }
                 
-            } catch (liffError) {
-                console.error('❌ LIFF エラー:', liffError);
-                updateConnectionStatus('error', 'LIFF接続エラー');
+                // プロフィール取得
+                userProfile = await liff.getProfile();
+                updateProgress(80, 'プロフィール取得中...');
                 
-                // フォールバック: テストユーザーを使用
-                currentUser = generateFallbackUser();
-                console.log('📋 フォールバックユーザーを使用:', currentUser);
-                updateConnectionStatus('connecting', 'テストモード');
-            }
-            
-            setUserInfo(currentUser.name, currentUser.picture);
-            
-            // GASにユーザー情報を送信（GET方式でCORS回避）
-            if (GAS_WEB_APP_URL && currentUser && currentUser.id) {
-                try {
-                    const params = new URLSearchParams({
-                        type: 'profileData',
-                        displayName: currentUser.name,
-                        userId: currentUser.id,
-                        pictureUrl: currentUser.picture || ''
-                    });
-                    
-                    const response = await fetch(`${GAS_WEB_APP_URL}?${params}`, {
-                        method: 'GET',
-                        redirect: 'follow'
-                    });
-                    
-                    const result = await response.text();
-                    console.log('✅ GASにユーザー情報送信成功:', result);
-                    updateConnectionStatus('connected', '接続完了');
-                    
-                } catch (error) {
-                    console.error('❌ GASへのユーザー情報送信エラー:', error);
-                    updateConnectionStatus('error', 'サーバー接続エラー');
+                // ページに表示
+                document.getElementById('userNameDetail').textContent = userProfile.displayName;
+                document.getElementById('userId').textContent = userProfile.userId;
+                
+                if (userProfile.pictureUrl) {
+                    document.getElementById('userPicture').src = userProfile.pictureUrl;
+                    document.getElementById('userPicture').alt = "プロフィール画像";
                 }
+                
+                // ヘッダーにも反映
+                updateHeaderUserInfo(userProfile.displayName, userProfile.pictureUrl);
+                
+                statusElement.innerHTML = '<span class="success">✅ LIFF初期化完了・ログイン済み</span>';
+                updateProgress(100, '接続完了');
+                
+            } catch (e) {
+                console.error("LIFF initialization failed", e);
+                statusElement.innerHTML = '<span class="error">❌ LIFF初期化エラー: ' + e.message + '</span>';
+                updateProgress(0, 'エラー発生');
             }
-            
-            return currentUser;
         }
-
-        // GASから問題を取得
-        async function fetchQuestionsFromGAS() {
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            loadingIndicator.style.display = 'flex';
-            document.getElementById('questionArea').style.minHeight = '200px';
-
+        
+        async function testConnection() {
+            const resultElement = document.getElementById('gasResult');
+            
+            if (gasUrl.includes("YOUR_NEW")) {
+                resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+                return;
+            }
+            
             try {
-                if (!GAS_WEB_APP_URL) {
-                    throw new Error('GAS_WEB_APP_URL ยังไม่ได้ตั้งค่า');
-                }
-
-                console.log('กำลังดึงคำถามจาก GAS...');
+                resultElement.innerHTML = '<span class="info">接続テスト中...</span>';
+                updateProgress(30, '接続テスト中...');
                 
-                // POST方式で問題を取得（Content-Typeをtext/plainにしてCORS回避）
-                const response = await fetch(GAS_WEB_APP_URL, {
+                const response = await fetch(gasUrl, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                
+                const text = await response.text();
+                resultElement.innerHTML = '<span class="success">✅ 接続成功: ' + text + '</span>';
+                updateProgress(100, '接続テスト完了');
+                
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                resultElement.innerHTML = '<span class="error">❌ 接続エラー: ' + error.message + '</span>';
+                updateProgress(0, '接続エラー');
+            }
+        }
+        
+        async function sendViaGet() {
+            const resultElement = document.getElementById('gasResult');
+            
+            if (!userProfile) {
+                resultElement.innerHTML = '<span class="error">❌ まずLIFFでログインしてください</span>';
+                return;
+            }
+            
+            if (gasUrl.includes("YOUR_NEW")) {
+                resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+                return;
+            }
+            
+            try {
+                resultElement.innerHTML = '<span class="info">GET方式でデータ送信中...</span>';
+                updateProgress(50, 'GET送信中...');
+                
+                // URLパラメータでデータを送信（CORS問題を完全回避）
+                const params = new URLSearchParams({
+                    type: 'profileData',
+                    displayName: userProfile.displayName,
+                    userId: userProfile.userId,
+                    pictureUrl: userProfile.pictureUrl || ''
+                });
+                
+                const response = await fetch(`${gasUrl}?${params}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                
+                const text = await response.text();
+                resultElement.innerHTML = '<span class="success">✅ GET送信成功: ' + text + '</span>';
+                updateProgress(100, 'GET送信完了');
+                
+            } catch (error) {
+                console.error('GET send failed:', error);
+                resultElement.innerHTML = '<span class="error">❌ GET送信エラー: ' + error.message + '</span>';
+                updateProgress(0, 'GET送信エラー');
+            }
+        }
+        
+        async function sendViaPost() {
+            const resultElement = document.getElementById('gasResult');
+            
+            if (!userProfile) {
+                resultElement.innerHTML = '<span class="error">❌ まずLIFFでログインしてください</span>';
+                return;
+            }
+            
+            if (gasUrl.includes("YOUR_NEW")) {
+                resultElement.innerHTML = '<span class="error">❌ GAS URLを設定してください！</span>';
+                return;
+            }
+            
+            try {
+                resultElement.innerHTML = '<span class="info">POST方式でデータ送信中...</span>';
+                updateProgress(50, 'POST送信中...');
+                
+                const data = {
+                    type: 'profileData',
+                    displayName: userProfile.displayName,
+                    userId: userProfile.userId,
+                    pictureUrl: userProfile.pictureUrl || ''
+                };
+                
+                // プリフライトリクエストを回避するためContent-Typeをtext/plainに設定
+                const response = await fetch(gasUrl, {
                     method: 'POST',
                     redirect: 'follow',
                     headers: {
                         'Content-Type': 'text/plain;charset=utf-8'
                     },
-                    body: JSON.stringify({ action: 'getQuestions' })
-                });
-
-                if (!response.ok) {
-                    let errorBody = 'サーバーからのエラー詳細はなし.';
-                    try {
-                        errorBody = await response.text();
-                        const jsonError = JSON.parse(errorBody);
-                        errorBody = jsonError.error || JSON.stringify(jsonError);
-                    } catch (parseError) {
-                        console.warn('JSONとしてエラー応答をパースできませんでした:', parseError);
-                    }
-                    throw new Error(`GASサーバーエラー (${response.status}): ${errorBody}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success && result.questions && result.questions.length > 0) {
-                    questions = result.questions;
-                    console.log('คำถามถูกดึงจาก GAS แล้ว:', questions);
-                    loadingIndicator.style.display = 'none';
-                    document.getElementById('questionArea').style.minHeight = 'auto';
-                    return true;
-                } else {
-                    console.error('ไม่สามารถดึงคำถามจาก GAS ได้:', result.error || 'ไม่มีคำถาม');
-                    document.getElementById('questionArea').innerHTML = `
-                        <div style="text-align: center; padding: 50px;">
-                            <div style="font-size: 20px; color: #f44336;">⚠️ ไม่สามารถโหลดคำถามได้</div>
-                            <div style="font-size: 14px; color: #666; margin-top: 10px;">โปรดตรวจสอบการตั้งค่า GAS และสเปรดชีต</div>
-                        </div>
-                    `;
-                    return false;
-                }
-            } catch (error) {
-                console.error('ข้อผิดพลาดในการดึงคำถามจาก GAS:', error);
-                document.getElementById('questionArea').innerHTML = `
-                    <div style="text-align: center; padding: 50px;">
-                        <div style="font-size: 20px; color: #f44336;">❌ ข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์</div>
-                        <div style="font-size: 14px; color: #666; margin-top: 10px;">โปรดลองอีกครั้งในภายหลัง</div>
-                        <div style="font-size: 12px; color: #999; margin-top: 5px;">(รายละเอียด: ${error.message || error})</div>
-                    </div>
-                `;
-                return false;
-            } finally {
-                loadingIndicator.style.display = 'none';
-            }
-        }
-
-        // ユーザーの進捗を取得（現在はダミー）
-        async function fetchUserProgressFromGAS() {
-            console.log('進捗取得は現在のデバッグではスキップ（0から開始）');
-            return 0;
-        }
-
-        // 回答選択処理
-        function selectAnswer(selectedAnswer) {
-            console.log('ผู้ใช้เลือกคำตอบ:', selectedAnswer);
-            
-            if (isAnswerSubmitted) return;
-            isAnswerSubmitted = true;
-
-            const question = questions[currentQuestionIndex];
-            const isCorrect = selectedAnswer === question.correctAnswer;
-
-            const buttons = document.querySelectorAll('.option-button');
-            buttons.forEach(button => {
-                button.disabled = true;
-                if (button.textContent === selectedAnswer) {
-                    button.classList.add(isCorrect ? 'correct' : 'incorrect');
-                }
-                if (!isCorrect && button.textContent === question.correctAnswer) {
-                    button.classList.add('correct');
-                }
-            });
-
-            const feedbackElement = document.getElementById('feedback');
-            feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'} show`;
-            feedbackElement.textContent = isCorrect ? 'ถูกต้อง!' : `ไม่ถูกต้อง คำตอบที่ถูกต้องคือ "${question.correctAnswer}"`;
-
-            if (isCorrect) {
-                correctAnswersCount++;
-            }
-            
-            // GASに回答を送信（GET方式でCORS回避）
-            if (currentUser && currentUser.id && GAS_WEB_APP_URL) {
-                const params = new URLSearchParams({
-                    type: 'answerData',
-                    userId: currentUser.id,
-                    userName: currentUser.name,
-                    questionIndex: currentQuestionIndex,
-                    answer: selectedAnswer,
-                    isCorrect: isCorrect,
-                    timestamp: new Date().toISOString()
+                    body: JSON.stringify(data)
                 });
                 
-                fetch(`${GAS_WEB_APP_URL}?${params}`, {
-                    method: 'GET',
-                    redirect: 'follow'
-                })
-                .then(response => response.text())
-                .then(result => {
-                    console.log('✅ GASに回答送信成功:', result);
-                })
-                .catch(error => console.error('❌ GASへの回答送信エラー:', error));
-            }
-
-            document.getElementById('nextButton').style.display = 'block';
-        }
-
-        // 次の問題へ進む
-        function nextQuestion() {
-            console.log('ไปยังข้อถัดไป');
-            currentQuestionIndex++;
-            if (currentQuestionIndex >= questions.length) {
-                showCompletion();
-            } else {
-                showQuestion();
-            }
-        }
-
-        // 問題表示
-        function showQuestion() {
-            if (questions.length === 0) {
-                console.warn('ไม่มีคำถามที่จะแสดง');
-                return;
-            }
-            console.log('กำลังแสดงข้อที่:', currentQuestionIndex + 1);
-            
-            const question = questions[currentQuestionIndex];
-            const questionArea = document.getElementById('questionArea');
-            
-            questionArea.innerHTML = `
-                <img class="question-image" src="${question.image}" alt="รูปคำถาม" onerror="this.onerror=null; this.src='https://placehold.co/400x200/CCCCCC/666666?text=Image+Not+Found';">
-                <div class="question-text">${question.question}</div>
-                <div class="options-container" id="optionsContainer">
-                    ${shuffleArray([...question.options]).map(option => 
-                        `<button class="option-button" onclick="selectAnswer('${option}')">${option}</button>`
-                    ).join('')}
-                </div>
-                <div class="feedback" id="feedback"></div>
-                <button class="next-button" id="nextButton" onclick="nextQuestion()">ข้อถัดไป</button>
-            `;
-            
-            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-            document.getElementById('progressText').textContent = `ข้อ ${currentQuestionIndex + 1} / ${questions.length}`;
-            
-            isAnswerSubmitted = false;
-        }
-
-        // 完了画面表示
-        async function showCompletion() {
-            console.log('แสดงหน้าสรุปผล');
-            const questionArea = document.getElementById('questionArea');
-
-            // GASに完了情報を送信（GET方式でCORS回避）
-            if (currentUser && currentUser.id && GAS_WEB_APP_URL) {
+                const text = await response.text();
+                resultElement.innerHTML = '<span class="success">✅ POST送信成功: ' + text + '</span>';
+                updateProgress(100, 'POST送信完了');
+                
+            } catch (error) {
+                console.error('POST send failed:', error);
+                
+                // フォールバック: フォーム形式で再試行
                 try {
-                    const params = new URLSearchParams({
-                        type: 'completionData',
-                        userId: currentUser.id,
-                        userName: currentUser.name,
-                        completedAt: new Date().toISOString(),
-                        correctAnswersCount: correctAnswersCount,
-                        totalQuestions: questions.length
+                    resultElement.innerHTML = '<span class="info">フォーム形式で再試行中...</span>';
+                    updateProgress(70, 'フォーム送信中...');
+                    
+                    const formData = new URLSearchParams({
+                        type: 'profileData',
+                        displayName: userProfile.displayName,
+                        userId: userProfile.userId,
+                        pictureUrl: userProfile.pictureUrl || ''
                     });
                     
-                    const response = await fetch(`${GAS_WEB_APP_URL}?${params}`, {
-                        method: 'GET',
-                        redirect: 'follow'
+                    const fallbackResponse = await fetch(gasUrl, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: formData
                     });
                     
-                    const result = await response.text();
-                    console.log('✅ GASに完了情報送信成功:', result);
+                    const fallbackText = await fallbackResponse.text();
+                    resultElement.innerHTML = '<span class="success">✅ フォーム形式で送信成功: ' + fallbackText + '</span>';
+                    updateProgress(100, 'フォーム送信完了');
                     
-                } catch (error) {
-                    console.error('❌ GASへの完了情報送信エラー:', error);
+                } catch (fallbackError) {
+                    resultElement.innerHTML = '<span class="error">❌ POST送信エラー: ' + error.message + ' (フォールバックも失敗: ' + fallbackError.message + ')</span>';
+                    updateProgress(0, 'POST送信エラー');
                 }
             }
-
-            questionArea.innerHTML = `
-                <div style="text-align: center; padding: 60px 20px;">
-                    <div style="font-size: 80px; margin-bottom: 30px;">🎉</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #00B900; margin-bottom: 16px;">ทำแบบทดสอบเสร็จแล้ว!</div>
-                    <div style="font-size: 18px; line-height: 1.6; color: #666; margin-bottom: 40px;">
-                        คุณตอบคำถามถูกต้อง ${correctAnswersCount} ข้อ จากทั้งหมด ${questions.length} ข้อ<br>
-                        เยี่ยมมาก!
-                    </div>
-                    <button onclick="restartQuiz()" style="background: linear-gradient(90deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; padding: 16px 32px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; touch-action: manipulation;">ลอง
+        }
+        
+        // ページ読み込み時に初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM読み込み完了、LIFF初期化開始');
+            updateProgress(10, '初期化開始...');
+            initializeLiff();
+        });
+    </script>
+</body>
+</html>
