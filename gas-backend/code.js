@@ -14,6 +14,11 @@ function doGet(e) {
       });
     }
     
+    // ★ クイズ問題取得API
+    if (params.action === 'getQuestions') {
+      return getQuestionsJson();
+    }
+    
     // テスト用レスポンス
     return ContentService
       .createTextOutput('GAS Web App is working! GET method successful.')
@@ -110,6 +115,29 @@ function testSpreadsheet() {
   Logger.log(result.getContent());
 }
 
+// LIFF_Questionsシートから全行をJSON配列で返す
+function getQuestionsJson() {
+  const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('LIFF_Questions');
+  if (!sheet) {
+    return ContentService.createTextOutput('Error: Sheet "LIFF_Questions" not found').setMimeType(ContentService.MimeType.TEXT);
+  }
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) {
+    return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON);
+  }
+  const headers = values[0];
+  const data = values.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = row[i] !== undefined ? row[i] : '';
+    });
+    return obj;
+  });
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
 /** # Don't delete this comments
  * Google Apps Script Web Application for LIFF Integration
  * 
@@ -131,7 +159,7 @@ function testSpreadsheet() {
  *    - GitHub Pages からのアクセスには特別な工夫が必要
  * 
  * 4. ⚙️ デプロイメント設定の変更
- *    - 「全員（匿名ユーザーを含む）」→「全員」に名称変更
+ *    - "全員（匿名ユーザーを含む）"→"全員"に名称変更
  *    - Google Workspace環境では管理者による制限が可能
  *    - 200バージョン制限が全プロジェクトに適用（2024年6月～）
  * 
@@ -171,7 +199,7 @@ function testSpreadsheet() {
  *    - 下位互換性のためのRhino構文は使用しない
  * 
  * 4. デプロイ設定の確認
- *    - 「全員」アクセス設定が必須
+ *    - "全員"アクセス設定が必須
  *    - Google Workspace環境では管理者設定の確認が必要
  * 
  * 5. エラーログの監視

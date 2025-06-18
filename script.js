@@ -89,39 +89,61 @@ function showError(message) {
 async function startQuiz() {
     try {
         updateProgress(90, 'กำลังโหลดคำถาม...');
-        
-        // サンプル問題データ（実際にはGASから取得）
-        questions = [
-            {
-                question: "เมืองหลวงของประเทศไทยคือข้อใด?",
-                options: ["กรุงเทพฯ", "เชียงใหม่", "ภูเก็ต", "พัทยา"],
-                correctAnswer: "กรุงเทพฯ",
-                image: "https://placehold.co/400x200/4CAF50/FFFFFF?text=Question+1"
-            },
-            {
-                question: "1 + 1 เท่ากับเท่าไหร่?",
-                options: ["1", "2", "3", "4"],
-                correctAnswer: "2",
-                image: "https://placehold.co/400x200/2196F3/FFFFFF?text=Question+2"
-            },
-            {
-                question: "มหาสมุทรที่ใหญ่ที่สุดในโลกคือข้อใด?",
-                options: ["แอตแลนติก", "แปซิฟิก", "อินเดีย", "อาร์กติก"],
-                correctAnswer: "แปซิฟิก",
-                image: "https://placehold.co/400x200/FF5722/FFFFFF?text=Question+3"
+
+        // GASから問題データを取得
+        const response = await fetch(`${gasUrl}?action=getQuestions`, {
+            method: 'GET',
+            redirect: 'follow'
+        });
+        const data = await response.json();
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        // 日付範囲内の問題のみ抽出
+        questions = data.filter(row => {
+            const start = new Date(row.TermStart);
+            const end = new Date(row.TermEnd);
+            start.setHours(0,0,0,0);
+            end.setHours(0,0,0,0);
+            return today >= start && today <= end;
+        }).map(row => {
+            // 選択肢生成（Answer＋SelectionSet1～10からAnswerを含む5つをランダムで）
+            const selections = [];
+            for (let i = 1; i <= 10; i++) {
+                const val = row[`SelectionSet${i}`];
+                if (val && val.trim() !== '') selections.push(val.trim());
             }
-        ];
-        
+            if (!selections.includes(row.Answer.trim())) {
+                selections.push(row.Answer.trim());
+            }
+            // Answerを含む5つをランダムで選択
+            let options = shuffleArray(selections.filter((v, i, a) => a.indexOf(v) === i));
+            if (!options.includes(row.Answer.trim())) options[0] = row.Answer.trim();
+            if (options.length > 5) {
+                // Answerを必ず含めて4つランダム
+                const filtered = options.filter(opt => opt !== row.Answer.trim());
+                options = shuffleArray(filtered).slice(0, 4);
+                options.push(row.Answer.trim());
+                options = shuffleArray(options);
+            }
+            return {
+                question: row.Question,
+                options: options,
+                correctAnswer: row.Answer.trim(),
+                image: row.Image
+            };
+        });
+
         currentQuestionIndex = 0;
         correctAnswersCount = 0;
-        
+
         updateProgress(100, 'พร้อมแล้ว!');
-        
+
         setTimeout(() => {
             showScreen('quiz');
             showQuestion();
         }, 500);
-        
+
     } catch (error) {
         console.error('Quiz start failed:', error);
         showError('ไม่สามารถโหลดแบบทดสอบได้');
@@ -131,16 +153,16 @@ async function startQuiz() {
 // 問題表示
 function showQuestion() {
     if (questions.length === 0) return;
-    
+
     const question = questions[currentQuestionIndex];
     const questionArea = document.getElementById('questionArea');
-    
-    // 選択肢のHTMLを生成
+
+    // 選択肢のHTMLを生成（毎回シャッフル）
     const optionsHtml = shuffleArray([...question.options]).map(option => {
         const escapedOption = option.replace(/'/g, "\\'");
         return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${option}</button>`;
     }).join('');
-    
+
     questionArea.innerHTML = `
         <img class="question-image" src="${question.image}" alt="รูปคำถาม" onerror="this.onerror=null; this.src='https://placehold.co/400x200/CCCCCC/666666?text=Image+Not+Found';">
         <div class="question-text">${question.question}</div>
@@ -150,10 +172,10 @@ function showQuestion() {
         <div class="feedback" id="feedback"></div>
         <button class="next-button" id="nextButton" onclick="nextQuestion()">ข้อถัดไป</button>
     `;
-    
+
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
     updateProgress(progress, `ข้อ ${currentQuestionIndex + 1} / ${questions.length}`);
-    
+
     isAnswerSubmitted = false;
 }
 
@@ -184,11 +206,23 @@ function selectAnswer(selectedAnswer) {
         }
         document.getElementById('nextButton').style.display = 'block';
     } else {
+        // 不正解時は選択肢を再生成して再表示
         feedbackElement.className = 'feedback incorrect show';
         feedbackElement.textContent = '不正解です。もう一度選んでください';
+        // 選択肢を再生成
+        const allOptions = [question.correctAnswer, ...question.options.filter(opt => opt !== question.correctAnswer)];
+        let newOptions = shuffleArray(allOptions.filter((v, i, a) => a.indexOf(v) === i));
+        if (!newOptions.includes(question.correctAnswer)) newOptions[0] = question.correctAnswer;
+        if (newOptions.length > 5) {
+            const filtered = newOptions.filter(opt => opt !== question.correctAnswer);
+            newOptions = shuffleArray(filtered).slice(0, 4);
+            newOptions.push(question.correctAnswer);
+            newOptions = shuffleArray(newOptions);
+        }
+        questions[currentQuestionIndex].options = newOptions;
         setTimeout(() => {
             showQuestion();
-        }, 1200); // 1.2秒後に再表示
+        }, 1200);
     }
 }
 
