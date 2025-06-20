@@ -137,7 +137,7 @@ body {
 }
 
 .question-text {
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1.4;
     margin-bottom: 14px;
     color: #333;
@@ -417,7 +417,7 @@ body {
     }
     
     .question-text {
-        font-size: 13px;
+        font-size: 20px;
     }
     
     .options-container {
@@ -445,7 +445,7 @@ body {
     }
     
     .question-image {
-        height: 70px;
+        height: 200px;
         margin-bottom: 8px;
     }
     
