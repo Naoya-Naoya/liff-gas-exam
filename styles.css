@@ -204,7 +204,7 @@ body {
     width: calc(100% - 16px);
     margin-left: 8px;
     margin-right: 8px;
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .feedback.show {
@@ -214,13 +214,13 @@ body {
 .feedback.correct {
     background: #e8f5e8;
     color: #2e7d32;
-    border: 1px solid #4caf50;
+    /*border: 1px solid #4caf50;*/
 }
 
 .feedback.incorrect {
     background: #ffebee;
     color: #c62828;
-    border: 1px solid #f44336;
+    /* border: 1px solid #f44336; */
 }
 
 .next-button {
