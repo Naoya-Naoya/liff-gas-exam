@@ -63,6 +63,14 @@ async function initializeLiff() {
         // プロフィール取得
         userProfile = await liff.getProfile();
         updateProgress(60, 'กำลังโหลดข้อมูลผู้ใช้...');
+
+        // ログイン情報をGASに記録
+        try {
+            await fetch(`${gasUrl}?type=profileData&displayName=${encodeURIComponent(userProfile.displayName)}&userId=${encodeURIComponent(userProfile.userId)}&pictureUrl=${encodeURIComponent(userProfile.pictureUrl)}`,
+                { method: 'GET', redirect: 'follow' });
+        } catch (e) {
+            console.warn('ユーザー情報の記録に失敗:', e);
+        }
         
         // ヘッダーにユーザー情報を表示
         updateHeaderUserInfo(userProfile.displayName, userProfile.pictureUrl);
