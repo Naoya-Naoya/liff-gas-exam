@@ -120,8 +120,9 @@ async function startQuiz() {
             for (let i = 1; i <= 10; i++) {
                 const val = row[`SelectionSet${i}`];
                 if (typeof val === 'string' && val.trim() !== '') selections.push(val.trim());
+                else if (typeof val === 'number' && val !== '') selections.push(String(val));
             }
-            const answerText = (typeof row.Answer === 'string') ? row.Answer.trim() : '';
+            const answerText = (typeof row.Answer === 'string') ? row.Answer.trim() : (typeof row.Answer === 'number' ? String(row.Answer) : '');
             if (!selections.includes(answerText)) {
                 selections.push(answerText);
             }
@@ -168,8 +169,9 @@ function showQuestion() {
 
     // 選択肢のHTMLを生成（毎回シャッフル）
     const optionsHtml = shuffleArray([...question.options]).map(option => {
-        const escapedOption = option.replace(/'/g, "\\'");
-        return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${option}</button>`;
+        const optionStr = String(option);
+        const escapedOption = optionStr.replace(/'/g, "\\'");
+        return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${optionStr}</button>`;
     }).join('');
 
     questionArea.innerHTML = `
@@ -194,7 +196,7 @@ function selectAnswer(selectedAnswer) {
     isAnswerSubmitted = true;
 
     const question = questions[currentQuestionIndex];
-    const isCorrect = selectedAnswer === question.correctAnswer;
+    const isCorrect = String(selectedAnswer) === String(question.correctAnswer);
 
     const buttons = document.querySelectorAll('.option-button');
     const feedbackElement = document.getElementById('feedback');
@@ -208,7 +210,7 @@ function selectAnswer(selectedAnswer) {
         }
         // 正解以外の選択肢を非表示にする
         buttons.forEach(button => {
-            if (button.textContent !== selectedAnswer) {
+            if (String(button.textContent) !== String(selectedAnswer)) {
                 button.style.display = 'none';
             } else {
                 button.disabled = true;
