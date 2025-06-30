@@ -126,8 +126,10 @@ async function startQuiz() {
             if (!selections.includes(answerText)) {
                 selections.push(answerText);
             }
+            // allOptions: 重複なし全選択肢
+            const allOptions = selections.filter((v, i, a) => a.indexOf(v) === i);
             // Answerを含む5つをランダムで選択
-            let options = shuffleArray(selections.filter((v, i, a) => a.indexOf(v) === i));
+            let options = shuffleArray(allOptions);
             if (!options.includes(answerText)) options[0] = answerText;
             if (options.length > 5) {
                 // Answerを必ず含めて4つランダム
@@ -140,7 +142,8 @@ async function startQuiz() {
                 question: row.Question,
                 options: options,
                 correctAnswer: answerText,
-                image: row.Image
+                image: row.Image,
+                allOptions: allOptions
             };
         });
 
