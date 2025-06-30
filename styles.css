@@ -167,7 +167,7 @@ body {
     font-size: 18px;
     cursor: pointer;
     transition: all 0.2s ease;
-    text-align: left;
+    text-align: center;
     min-height: 36px;
     display: flex;
     align-items: center;

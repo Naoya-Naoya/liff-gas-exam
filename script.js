@@ -167,8 +167,16 @@ function showQuestion() {
     const question = questions[currentQuestionIndex];
     const questionArea = document.getElementById('questionArea');
 
-    // 選択肢のHTMLを生成（毎回シャッフル）
-    const optionsHtml = shuffleArray([...question.options]).map(option => {
+    // 正解と不正解の選択肢を分離
+    const correct = question.correctAnswer;
+    const incorrects = question.options.filter(opt => opt !== correct);
+    // 不正解からランダムで4つ選ぶ
+    const selectedIncorrects = shuffleArray(incorrects).slice(0, 4);
+    // 正解と合わせて配列にし、シャッフル
+    const displayOptions = shuffleArray([correct, ...selectedIncorrects]);
+
+    // 選択肢のHTMLを生成
+    const optionsHtml = displayOptions.map(option => {
         const optionStr = String(option);
         const escapedOption = optionStr.replace(/'/g, "\\'");
         return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${optionStr}</button>`;
