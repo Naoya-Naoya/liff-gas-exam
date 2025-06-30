@@ -8,6 +8,7 @@ let currentQuestionIndex = 0;
 let correctAnswersCount = 0;
 let isAnswerSubmitted = false;
 let currentScreen = 'loading';
+let selectedBrand = null;
 
 // プログレスバー更新
 function updateProgress(percentage, text) {
@@ -33,7 +34,7 @@ function showScreen(screenName) {
     document.getElementById('errorScreen').style.display = 'none';
     document.getElementById('quizScreen').style.display = 'none';
     document.getElementById('completionScreen').style.display = 'none';
-    
+    document.getElementById('brandSelectScreen').style.display = 'none';
     if (screenName === 'loading') {
         document.getElementById('loadingScreen').style.display = 'block';
     } else if (screenName === 'error') {
@@ -42,8 +43,21 @@ function showScreen(screenName) {
         document.getElementById('quizScreen').style.display = 'block';
     } else if (screenName === 'completion') {
         document.getElementById('completionScreen').style.display = 'block';
+    } else if (screenName === 'brandSelect') {
+        document.getElementById('brandSelectScreen').style.display = 'block';
     }
     currentScreen = screenName;
+}
+
+// ブランド選択画面の表示
+function showBrandSelectScreen() {
+    showScreen('none');
+    document.getElementById('brandSelectScreen').style.display = 'block';
+}
+
+// ブランド選択画面の非表示
+function hideBrandSelectScreen() {
+    document.getElementById('brandSelectScreen').style.display = 'none';
 }
 
 // LIFF初期化
@@ -77,8 +91,8 @@ async function initializeLiff() {
         
         updateProgress(80, 'กำลังโหลดแบบทดสอบ...');
         
-        // クイズを開始
-        await startQuiz();
+        // ブランド選択画面を表示
+        showScreen('brandSelect');
         
     } catch (e) {
         console.error("LIFF initialization failed", e);
@@ -107,14 +121,20 @@ async function startQuiz() {
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 日付範囲内の問題のみ抽出
-        questions = data.filter(row => {
+        // ブランドでフィルタ
+        let filtered = data.filter(row => {
             const start = new Date(row.TermStart);
             const end = new Date(row.TermEnd);
             start.setHours(0,0,0,0);
             end.setHours(0,0,0,0);
-            return today >= start && today <= end;
-        }).map(row => {
+            let brandMatch = true;
+            if (selectedBrand && row.Brand) {
+                if (selectedBrand === 'LM') brandMatch = row.Brand === 'LM';
+                else if (selectedBrand === 'HA') brandMatch = row.Brand === 'HA';
+            }
+            return today >= start && today <= end && brandMatch;
+        });
+        questions = filtered.map(row => {
             // 選択肢生成（Answer＋SelectionSet1～10からAnswerを含む5つをランダムで）
             const selections = [];
             for (let i = 1; i <= 10; i++) {
@@ -352,4 +372,20 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         initializeLiff();
     }, 1000);
+
+    // ブランド選択ボタンのイベント
+    const lmBtn = document.getElementById('brandLM');
+    const haBtn = document.getElementById('brandHA');
+    if (lmBtn && haBtn) {
+        lmBtn.addEventListener('click', function() {
+            selectedBrand = 'LM';
+            hideBrandSelectScreen();
+            startQuiz();
+        });
+        haBtn.addEventListener('click', function() {
+            selectedBrand = 'HA';
+            hideBrandSelectScreen();
+            startQuiz();
+        });
+    }
 });
