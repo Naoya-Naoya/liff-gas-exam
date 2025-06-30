@@ -173,10 +173,10 @@ function showQuestion() {
     // 不正解からランダムで4つ選ぶ
     const selectedIncorrects = shuffleArray(incorrects).slice(0, 4);
     // 正解と合わせて配列にし、シャッフル
-    const displayOptions = shuffleArray([correct, ...selectedIncorrects]);
+    const newOptions = shuffleArray([correct, ...selectedIncorrects]);
 
     // 選択肢のHTMLを生成
-    const optionsHtml = displayOptions.map(option => {
+    const optionsHtml = newOptions.map(option => {
         const optionStr = String(option);
         const escapedOption = optionStr.replace(/'/g, "\\'");
         return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${optionStr}</button>`;
@@ -231,15 +231,13 @@ function selectAnswer(selectedAnswer) {
         feedbackElement.className = 'feedback incorrect show';
         feedbackElement.textContent = '不正解です。もう一度選んでください';
         // 選択肢を再生成
-        const allOptions = [question.correctAnswer, ...question.options.filter(opt => opt !== question.correctAnswer)];
-        let newOptions = shuffleArray(allOptions.filter((v, i, a) => a.indexOf(v) === i));
-        if (!newOptions.includes(question.correctAnswer)) newOptions[0] = question.correctAnswer;
-        if (newOptions.length > 5) {
-            const filtered = newOptions.filter(opt => opt !== question.correctAnswer);
-            newOptions = shuffleArray(filtered).slice(0, 4);
-            newOptions.push(question.correctAnswer);
-            newOptions = shuffleArray(newOptions);
-        }
+        // 正解と不正解の選択肢を分離
+        const correct = question.correctAnswer;
+        const incorrects = question.options.filter(opt => opt !== correct);
+        // 不正解からランダムで4つ選ぶ
+        const selectedIncorrects = shuffleArray(incorrects).slice(0, 4);
+        // 正解と合わせて配列にし、シャッフル
+        const newOptions = shuffleArray([correct, ...selectedIncorrects]);
         questions[currentQuestionIndex].options = newOptions;
         setTimeout(() => {
             showQuestion();

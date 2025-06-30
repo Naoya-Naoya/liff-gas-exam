@@ -378,6 +378,7 @@ body {
     .question-text {
         font-size: 22px;
         margin-bottom: 30px;
+        text-align: center;
     }
     
     .options-container {
@@ -424,6 +425,7 @@ body {
     
     .question-text {
         font-size: 20px;
+        text-align: center;
     }
     
     .options-container {
