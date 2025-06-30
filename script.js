@@ -121,23 +121,24 @@ async function startQuiz() {
                 const val = row[`SelectionSet${i}`];
                 if (typeof val === 'string' && val.trim() !== '') selections.push(val.trim());
             }
-            if (!selections.includes(row.Answer.trim())) {
-                selections.push(row.Answer.trim());
+            const answerText = (typeof row.Answer === 'string') ? row.Answer.trim() : '';
+            if (!selections.includes(answerText)) {
+                selections.push(answerText);
             }
             // Answerを含む5つをランダムで選択
             let options = shuffleArray(selections.filter((v, i, a) => a.indexOf(v) === i));
-            if (!options.includes(row.Answer.trim())) options[0] = row.Answer.trim();
+            if (!options.includes(answerText)) options[0] = answerText;
             if (options.length > 5) {
                 // Answerを必ず含めて4つランダム
-                const filtered = options.filter(opt => opt !== row.Answer.trim());
+                const filtered = options.filter(opt => opt !== answerText);
                 options = shuffleArray(filtered).slice(0, 4);
-                options.push(row.Answer.trim());
+                options.push(answerText);
                 options = shuffleArray(options);
             }
             return {
                 question: row.Question,
                 options: options,
-                correctAnswer: row.Answer.trim(),
+                correctAnswer: answerText,
                 image: row.Image
             };
         });
