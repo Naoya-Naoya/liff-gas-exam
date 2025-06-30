@@ -167,16 +167,15 @@ function showQuestion() {
     const question = questions[currentQuestionIndex];
     const questionArea = document.getElementById('questionArea');
 
-    // 正解と不正解の選択肢を分離
+    // 毎回全選択肢からランダムで4つ不正解を選び、正解と合わせてシャッフル
+    const allOptions = question.allOptions || question.options;
     const correct = question.correctAnswer;
-    const incorrects = question.options.filter(opt => opt !== correct);
-    // 不正解からランダムで4つ選ぶ
+    const incorrects = allOptions.filter(opt => opt !== correct);
     const selectedIncorrects = shuffleArray(incorrects).slice(0, 4);
-    // 正解と合わせて配列にし、シャッフル
-    const newOptions = shuffleArray([correct, ...selectedIncorrects]);
+    const displayOptions = shuffleArray([correct, ...selectedIncorrects]);
 
     // 選択肢のHTMLを生成
-    const optionsHtml = newOptions.map(option => {
+    const optionsHtml = displayOptions.map(option => {
         const optionStr = String(option);
         const escapedOption = optionStr.replace(/'/g, "\\'");
         return `<button class="option-button" onclick="selectAnswer('${escapedOption}')">${optionStr}</button>`;
@@ -230,15 +229,14 @@ function selectAnswer(selectedAnswer) {
         // 不正解時は選択肢を再生成して再表示
         feedbackElement.className = 'feedback incorrect show';
         feedbackElement.textContent = '不正解です。もう一度選んでください';
-        // 選択肢を再生成
-        // 正解と不正解の選択肢を分離
+        // 毎回全選択肢からランダムで4つ不正解を選び、正解と合わせてシャッフル
+        const allOptions = question.allOptions || question.options;
         const correct = question.correctAnswer;
-        const incorrects = question.options.filter(opt => opt !== correct);
-        // 不正解からランダムで4つ選ぶ
+        const incorrects = allOptions.filter(opt => opt !== correct);
         const selectedIncorrects = shuffleArray(incorrects).slice(0, 4);
-        // 正解と合わせて配列にし、シャッフル
         const newOptions = shuffleArray([correct, ...selectedIncorrects]);
-        questions[currentQuestionIndex].options = newOptions;
+        // optionsには再生成した選択肢を一時的に格納（次回のため）
+        questions[currentQuestionIndex].options = allOptions;
         setTimeout(() => {
             showQuestion();
         }, 1200);
