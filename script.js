@@ -119,7 +119,7 @@ async function startQuiz() {
             const selections = [];
             for (let i = 1; i <= 10; i++) {
                 const val = row[`SelectionSet${i}`];
-                if (val && val.trim() !== '') selections.push(val.trim());
+                if (typeof val === 'string' && val.trim() !== '') selections.push(val.trim());
             }
             if (!selections.includes(row.Answer.trim())) {
                 selections.push(row.Answer.trim());
