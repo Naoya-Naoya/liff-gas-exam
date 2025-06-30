@@ -197,13 +197,6 @@ function selectAnswer(selectedAnswer) {
     const isCorrect = selectedAnswer === question.correctAnswer;
 
     const buttons = document.querySelectorAll('.option-button');
-    buttons.forEach(button => {
-        button.disabled = true;
-        if (button.textContent === selectedAnswer) {
-            button.classList.add(isCorrect ? 'correct' : 'incorrect');
-        }
-    });
-
     const feedbackElement = document.getElementById('feedback');
     if (isCorrect) {
         feedbackElement.className = 'feedback correct show';
@@ -213,6 +206,15 @@ function selectAnswer(selectedAnswer) {
         if (userProfile && gasUrl) {
             sendAnswerToGAS(selectedAnswer, isCorrect);
         }
+        // 正解以外の選択肢を非表示にする
+        buttons.forEach(button => {
+            if (button.textContent !== selectedAnswer) {
+                button.style.display = 'none';
+            } else {
+                button.disabled = true;
+                button.classList.add('correct');
+            }
+        });
         document.getElementById('nextButton').style.display = 'block';
     } else {
         // 不正解時は選択肢を再生成して再表示
