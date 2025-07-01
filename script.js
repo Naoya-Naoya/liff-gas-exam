@@ -95,6 +95,11 @@ function showDashboard(status) {
         li.textContent = `${item.dateTime}　${item.accuracy}%`;
         recentList.appendChild(li);
     });
+    // クイズスタートボタンのイベントを毎回バインド
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    if (startQuizBtn) {
+        startQuizBtn.onclick = onStartQuiz;
+    }
 }
 
 // ブランド選択画面の表示
