@@ -18,6 +18,14 @@ function doGet(e) {
     if (params.action === 'getQuestions') {
       return getQuestionsJson();
     }
+    // ★ ユーザー回答ログ保存API
+    if (params.action === 'saveAnswer') {
+      return saveAnswerLog(params);
+    }
+    // ★ クイズ完了ログ保存API
+    if (params.action === 'saveCompletion') {
+      return saveCompletionLog(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -136,6 +144,70 @@ function getQuestionsJson() {
     return obj;
   });
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ユーザー回答ログをスプレッドシートに保存
+function saveAnswerLog(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Actions');
+    if (!sheet) {
+      return ContentService
+        .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+    const timestamp = params.timestamp || new Date().toISOString();
+    sheet.appendRow([
+      'answer',
+      timestamp,
+      params.userId || '',
+      params.userName || '',
+      params.questionIndex || '',
+      params.answer || '',
+      params.isCorrect || ''
+    ]);
+    return ContentService
+      .createTextOutput('SUCCESS: Answer log saved.')
+      .setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService
+      .createTextOutput('Spreadsheet Error: ' + error.message)
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// クイズ完了ログをスプレッドシートに保存
+function saveCompletionLog(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Actions');
+    if (!sheet) {
+      return ContentService
+        .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+    const completedAt = params.completedAt || new Date().toISOString();
+    sheet.appendRow([
+      'completion',
+      completedAt,
+      params.userId || '',
+      params.userName || '',
+      '', // questionIndex
+      '', // answer
+      '', // isCorrect
+      params.correctAnswersCount || '',
+      params.totalQuestions || ''
+    ]);
+    return ContentService
+      .createTextOutput('SUCCESS: Completion log saved.')
+      .setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService
+      .createTextOutput('Spreadsheet Error: ' + error.message)
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
 }
 
 /** # Don't delete this comments
