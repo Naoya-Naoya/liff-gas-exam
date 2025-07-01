@@ -10,6 +10,8 @@ let totalAnswerCount = 0;
 let isAnswerSubmitted = false;
 let currentScreen = 'loading';
 let selectedBrand = null;
+let userBrand = null;
+let isBrandChecked = false;
 
 // プログレスバー更新
 function updateProgress(percentage, text) {
@@ -79,6 +81,61 @@ async function sendUserActionLog(actionType, extra = {}) {
     }
 }
 
+// ダッシュボード画面の表示
+function showDashboard(status) {
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
+    document.getElementById('monthStatus').textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
+    const recentList = document.getElementById('recentClears');
+    recentList.innerHTML = '';
+    status.recent.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.dateTime}　${item.accuracy}%`;
+        recentList.appendChild(li);
+    });
+}
+
+// ブランド選択画面の表示
+function showBrandSelectScreenForFirst() {
+    showScreen('none');
+    document.getElementById('brandSelectScreen').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+}
+
+// ブランド保存API
+async function saveUserBrand(brand) {
+    if (!userProfile || !brand) return;
+    await fetch(`${gasUrl}?action=saveBrand&userId=${encodeURIComponent(userProfile.userId)}&displayName=${encodeURIComponent(userProfile.displayName)}&pictureUrl=${encodeURIComponent(userProfile.pictureUrl)}&brand=${encodeURIComponent(brand)}`);
+    userBrand = brand;
+}
+
+// ブランド取得API
+async function fetchUserBrand() {
+    if (!userProfile) return '';
+    const res = await fetch(`${gasUrl}?action=getBrand&userId=${encodeURIComponent(userProfile.userId)}`);
+    const data = await res.json();
+    return data.brand || '';
+}
+
+// ユーザーステータス取得API
+async function fetchUserStatus() {
+    if (!userProfile) return null;
+    const res = await fetch(`${gasUrl}?action=getUserStatus&userId=${encodeURIComponent(userProfile.userId)}`);
+    return await res.json();
+}
+
+// クイズスタートボタンイベント
+async function onStartQuiz() {
+    // ブランドが未設定ならブランド選択画面へ
+    if (!userBrand) {
+        showBrandSelectScreenForFirst();
+        return;
+    }
+    // クイズ画面へ
+    showScreen('quiz');
+    startQuiz();
+}
+
 // LIFF初期化
 async function initializeLiff() {
     try {
@@ -113,8 +170,15 @@ async function initializeLiff() {
         // ログインアクションログ
         sendUserActionLog('login');
         
-        // ブランド選択画面を表示
-        showScreen('brandSelect');
+        // ブランド取得
+        userBrand = await fetchUserBrand();
+        isBrandChecked = true;
+        // ステータス取得
+        const status = await fetchUserStatus();
+        // ダッシュボード表示
+        showScreen('none');
+        document.getElementById('dashboard').style.display = 'block';
+        showDashboard(status);
         
     } catch (e) {
         console.error("LIFF initialization failed", e);
@@ -134,7 +198,11 @@ async function startQuiz() {
     try {
         updateProgress(90, 'กำลังโหลดคำถาม...');
 
-        // GASから問題データを取得
+        // ブランド取得済みでなければ取得
+        if (!userBrand && isBrandChecked === false) {
+            userBrand = await fetchUserBrand();
+            isBrandChecked = true;
+        }
         const response = await fetch(`${gasUrl}?action=getQuestions`, {
             method: 'GET',
             redirect: 'follow'
@@ -150,9 +218,8 @@ async function startQuiz() {
             start.setHours(0,0,0,0);
             end.setHours(0,0,0,0);
             let brandMatch = true;
-            if (selectedBrand && row.Brand) {
-                if (selectedBrand === 'LM') brandMatch = row.Brand === 'LM';
-                else if (selectedBrand === 'HA') brandMatch = row.Brand === 'HA';
+            if (userBrand && row.Brand) {
+                brandMatch = row.Brand === userBrand;
             }
             return today >= start && today <= end && brandMatch;
         });
@@ -196,7 +263,7 @@ async function startQuiz() {
         currentQuestionIndex = 0;
         correctAnswersCount = 0;
         totalAnswerCount = 0;
-        sendUserActionLog('startQuiz', { brand: selectedBrand });
+        sendUserActionLog('startQuiz', { brand: userBrand });
 
         updateProgress(100, 'พร้อมแล้ว!');
 
@@ -411,18 +478,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const lmBtn = document.getElementById('brandLM');
     const haBtn = document.getElementById('brandHA');
     if (lmBtn && haBtn) {
-        lmBtn.addEventListener('click', function() {
-            selectedBrand = 'LM';
-            hideBrandSelectScreen();
-            sendUserActionLog('selectBrand', { brand: 'LM' });
-            startQuiz();
+        lmBtn.addEventListener('click', async function() {
+            await saveUserBrand('LM');
+            document.getElementById('brandSelectScreen').style.display = 'none';
+            // ダッシュボード再表示
+            const status = await fetchUserStatus();
+            showDashboard(status);
         });
-        haBtn.addEventListener('click', function() {
-            selectedBrand = 'HA';
-            hideBrandSelectScreen();
-            sendUserActionLog('selectBrand', { brand: 'HA' });
-            startQuiz();
+        haBtn.addEventListener('click', async function() {
+            await saveUserBrand('HA');
+            document.getElementById('brandSelectScreen').style.display = 'none';
+            // ダッシュボード再表示
+            const status = await fetchUserStatus();
+            showDashboard(status);
         });
+    }
+
+    // クイズスタートボタン
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    if (startQuizBtn) {
+        startQuizBtn.addEventListener('click', onStartQuiz);
     }
 });
 

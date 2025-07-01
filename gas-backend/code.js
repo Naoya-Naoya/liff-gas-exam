@@ -30,6 +30,18 @@ function doGet(e) {
     if (params.action === 'saveActionLog') {
       return saveActionLog(params);
     }
+    // ★ ブランド保存API
+    if (params.action === 'saveBrand') {
+      return saveBrand(params);
+    }
+    // ★ ブランド取得API
+    if (params.action === 'getBrand') {
+      return getBrand(params);
+    }
+    // ★ ユーザーステータス取得API
+    if (params.action === 'getUserStatus') {
+      return getUserStatus(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -220,6 +232,103 @@ function saveActionLog(params) {
   }
 }
 
+// ブランド保存
+function saveBrand(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    const brand = params.brand;
+    if (!userId || !brand) {
+      return ContentService.createTextOutput('Error: userId and brand required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][2] === userId) { // userId列
+        sheet.getRange(i+1, 5).setValue(brand); // brand列（E列=5）
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      sheet.appendRow([new Date(), params.displayName || '', userId, params.pictureUrl || '', brand]);
+    }
+    return ContentService.createTextOutput('SUCCESS: Brand saved').setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ブランド取得
+function getBrand(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    if (!userId) {
+      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][2] === userId) {
+        return ContentService.createTextOutput(JSON.stringify({ brand: values[i][4] || '' })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ brand: '' })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ユーザーステータス取得
+function getUserStatus(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
+    const profilesSheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!clearsSheet || !profilesSheet) {
+      return ContentService.createTextOutput('Error: Sheet not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    if (!userId) {
+      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const now = new Date();
+    const todayStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
+    const monthStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM');
+    const clears = clearsSheet.getDataRange().getValues().filter(row => row[0] === userId);
+    // 今日のクリア数
+    const todayCount = clears.filter(row => row[1] === todayStr).length;
+    // 今月のノルマ達成日数
+    const monthDays = new Set(clears.filter(row => (row[1] || '').startsWith(monthStr) && row[2]).map(row => row[1]));
+    const monthStatus = monthDays.size;
+    // 最新10回履歴
+    const recent = clears.slice(-10).reverse().map(row => ({ dateTime: row[2], accuracy: row[3] }));
+    // ブランド
+    let brand = '';
+    const profiles = profilesSheet.getDataRange().getValues();
+    for (let i = 1; i < profiles.length; i++) {
+      if (profiles[i][2] === userId) {
+        brand = profiles[i][4] || '';
+        break;
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
 // クイズ完了ログをスプレッドシートに保存
 function saveCompletionLog(params) {
   try {
@@ -244,6 +353,21 @@ function saveCompletionLog(params) {
       params.totalQuestions || '',
       params.accuracy || ''
     ]);
+    // ★ 5問全問正解ならLIFF_User_Clearsに記録
+    if (Number(params.correctAnswersCount) === Number(params.totalQuestions) && Number(params.totalQuestions) > 0) {
+      const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
+      if (clearsSheet) {
+        const now = new Date();
+        const dateStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
+        const dateTimeStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+        clearsSheet.appendRow([
+          params.userId || '',
+          dateStr,
+          dateTimeStr,
+          params.accuracy || ''
+        ]);
+      }
+    }
     return ContentService
       .createTextOutput('SUCCESS: Completion log saved.')
       .setMimeType(ContentService.MimeType.TEXT);
