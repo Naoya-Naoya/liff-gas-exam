@@ -83,22 +83,31 @@ async function sendUserActionLog(actionType, extra = {}) {
 
 // ダッシュボード画面の表示
 function showDashboard(status) {
-    hideAllScreens();
-    console.log('showDashboard呼び出し');
-    document.getElementById('dashboard').style.display = 'block';
-    document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
-    document.getElementById('monthStatus').textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
-    const recentList = document.getElementById('recentClears');
-    recentList.innerHTML = '';
-    status.recent.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = `${item.dateTime}　${item.accuracy}%`;
-        recentList.appendChild(li);
-    });
-    // クイズスタートボタンのイベントを毎回バインド
-    const startQuizBtn = document.getElementById('startQuizBtn');
-    if (startQuizBtn) {
-        startQuizBtn.onclick = onStartQuiz;
+    try {
+        hideAllScreens();
+        console.log('showDashboard呼び出し');
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
+        document.getElementById('monthStatus').textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
+        const recentList = document.getElementById('recentClears');
+        recentList.innerHTML = '';
+        if (Array.isArray(status.recent)) {
+            status.recent.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.dateTime}　${item.accuracy}%`;
+                recentList.appendChild(li);
+            });
+        } else {
+            console.log('status.recentが配列ではありません:', status.recent);
+        }
+        // クイズスタートボタンのイベントを毎回バインド
+        const startQuizBtn = document.getElementById('startQuizBtn');
+        if (startQuizBtn) {
+            startQuizBtn.onclick = onStartQuiz;
+        }
+    } catch (e) {
+        console.error('showDashboardでエラー:', e, status);
+        showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
     }
 }
 
