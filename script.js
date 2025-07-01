@@ -134,6 +134,10 @@ async function startQuiz() {
             }
             return today >= start && today <= end && brandMatch;
         });
+        // 5問以上ならランダムで5問だけ抽出
+        if (filtered.length > 5) {
+            filtered = shuffleArray(filtered).slice(0, 5);
+        }
         questions = filtered.map(row => {
             // 選択肢生成（Answer＋SelectionSet1～10からAnswerを含む5つをランダムで）
             const selections = [];
