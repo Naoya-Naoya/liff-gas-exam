@@ -140,7 +140,11 @@ async function onStartQuiz() {
     }
     hideAllScreens();
     document.getElementById('quizScreen').style.display = 'block';
-    await startQuiz();
+    try {
+        await startQuiz();
+    } catch (e) {
+        showError('クイズ開始エラー: ' + (e && e.message ? e.message : e));
+    }
 }
 
 // LIFF初期化
@@ -292,7 +296,7 @@ async function startQuiz() {
         }, 500);
     } catch (error) {
         console.error('Quiz start failed:', error);
-        showError('ไม่สามารถโหลดแบบทดสอบได้');
+        showError('ไม่สามารถโหลดแบบทดสอบได้: ' + (error && error.message ? error.message : error));
     }
 }
 
