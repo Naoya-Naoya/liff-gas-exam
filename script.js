@@ -6,6 +6,7 @@ let userProfile = null;
 let questions = [];
 let currentQuestionIndex = 0;
 let correctAnswersCount = 0;
+let totalAnswerCount = 0;
 let isAnswerSubmitted = false;
 let currentScreen = 'loading';
 let selectedBrand = null;
@@ -195,6 +196,7 @@ async function startQuiz() {
 
         currentQuestionIndex = 0;
         correctAnswersCount = 0;
+        totalAnswerCount = 0;
         sendUserActionLog('startQuiz', { brand: selectedBrand });
 
         updateProgress(100, 'พร้อมแล้ว!');
@@ -251,11 +253,9 @@ function showQuestion() {
 function selectAnswer(selectedAnswer) {
     if (isAnswerSubmitted) return;
     isAnswerSubmitted = true;
-
     const question = questions[currentQuestionIndex];
     const isCorrect = String(selectedAnswer) === String(question.correctAnswer);
-
-    const buttons = document.querySelectorAll('.option-button');
+    totalAnswerCount++;
     const feedbackElement = document.getElementById('feedback');
     sendUserActionLog('answer', {
         questionIndex: currentQuestionIndex,
@@ -272,6 +272,7 @@ function selectAnswer(selectedAnswer) {
             sendAnswerToGAS(selectedAnswer, isCorrect);
         }
         // 正解以外の選択肢を非表示にする
+        const buttons = document.querySelectorAll('.option-button');
         buttons.forEach(button => {
             if (String(button.textContent) !== String(selectedAnswer)) {
                 button.style.display = 'none';
@@ -317,7 +318,7 @@ function showCompletion() {
     showScreen('completion');
     updateProgress(100, 'เสร็จสิ้น!');
     
-    const percentage = Math.round((correctAnswersCount / questions.length) * 100);
+    const percentage = totalAnswerCount > 0 ? Math.round((correctAnswersCount / totalAnswerCount) * 100) : 0;
     const completionText = document.getElementById('completionText');
     completionText.innerHTML = `
         คุณตอบถูก ${correctAnswersCount} ข้อ จากทั้งหมด ${questions.length} ข้อ<br>
@@ -341,6 +342,7 @@ function showCompletion() {
 function restartQuiz() {
     currentQuestionIndex = 0;
     correctAnswersCount = 0;
+    totalAnswerCount = 0;
     startQuiz();
 }
 
@@ -377,7 +379,9 @@ async function sendCompletionToGAS(accuracy) {
             completedAt: new Date().toISOString(),
             correctAnswersCount: correctAnswersCount,
             totalQuestions: questions.length,
-            accuracy: accuracy
+            totalAnswerCount: totalAnswerCount,
+            accuracy: accuracy,
+            showScreen: 'completion'
         });
         
         await fetch(`${gasUrl}?${params}`, {
