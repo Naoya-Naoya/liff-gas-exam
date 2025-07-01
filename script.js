@@ -46,6 +46,7 @@ function showScreen(screenName) {
     } else if (screenName === 'brandSelect') {
         document.getElementById('brandSelectScreen').style.display = 'block';
     }
+    sendUserActionLog('showScreen', { screen: screenName });
     currentScreen = screenName;
 }
 
@@ -58,6 +59,24 @@ function showBrandSelectScreen() {
 // ブランド選択画面の非表示
 function hideBrandSelectScreen() {
     document.getElementById('brandSelectScreen').style.display = 'none';
+}
+
+// ユーザーアクションログをGASに送信
+async function sendUserActionLog(actionType, extra = {}) {
+    if (!userProfile || !gasUrl) return;
+    const params = new URLSearchParams({
+        action: 'saveActionLog',
+        userId: userProfile.userId,
+        userName: userProfile.displayName,
+        actionType: actionType,
+        timestamp: new Date().toISOString(),
+        ...extra
+    });
+    try {
+        await fetch(`${gasUrl}?${params}`, { method: 'GET', redirect: 'follow' });
+    } catch (e) {
+        console.warn('アクションログ送信失敗:', e);
+    }
 }
 
 // LIFF初期化
@@ -90,6 +109,9 @@ async function initializeLiff() {
         updateHeaderUserInfo(userProfile.displayName, userProfile.pictureUrl);
         
         updateProgress(80, 'กำลังโหลดแบบทดสอบ...');
+        
+        // ログインアクションログ
+        sendUserActionLog('login');
         
         // ブランド選択画面を表示
         showScreen('brandSelect');
@@ -173,6 +195,7 @@ async function startQuiz() {
 
         currentQuestionIndex = 0;
         correctAnswersCount = 0;
+        sendUserActionLog('startQuiz', { brand: selectedBrand });
 
         updateProgress(100, 'พร้อมแล้ว!');
 
@@ -234,6 +257,12 @@ function selectAnswer(selectedAnswer) {
 
     const buttons = document.querySelectorAll('.option-button');
     const feedbackElement = document.getElementById('feedback');
+    sendUserActionLog('answer', {
+        questionIndex: currentQuestionIndex,
+        answer: selectedAnswer,
+        isCorrect: isCorrect,
+        question: question.question
+    });
     if (isCorrect) {
         feedbackElement.className = 'feedback correct show';
         feedbackElement.textContent = 'ถูกต้อง!';
@@ -267,6 +296,9 @@ function selectAnswer(selectedAnswer) {
         setTimeout(() => {
             showQuestion();
         }, 1200);
+        if (userProfile && gasUrl) {
+            sendAnswerToGAS(selectedAnswer, false); // 不正解も必ず送信
+        }
     }
 }
 
@@ -293,9 +325,15 @@ function showCompletion() {
         เยี่ยมมาก!
     `;
 
+    sendUserActionLog('quizComplete', {
+        correctAnswersCount: correctAnswersCount,
+        totalQuestions: questions.length,
+        accuracy: percentage
+    });
+
     // GASに完了データを送信（オプション）
     if (userProfile && gasUrl) {
-        sendCompletionToGAS();
+        sendCompletionToGAS(percentage);
     }
 }
 
@@ -330,7 +368,7 @@ async function sendAnswerToGAS(answer, isCorrect) {
 }
 
 // GASに完了データを送信
-async function sendCompletionToGAS() {
+async function sendCompletionToGAS(accuracy) {
     try {
         const params = new URLSearchParams({
             action: 'saveCompletion',
@@ -338,7 +376,8 @@ async function sendCompletionToGAS() {
             userName: userProfile.displayName,
             completedAt: new Date().toISOString(),
             correctAnswersCount: correctAnswersCount,
-            totalQuestions: questions.length
+            totalQuestions: questions.length,
+            accuracy: accuracy
         });
         
         await fetch(`${gasUrl}?${params}`, {
@@ -384,12 +423,19 @@ document.addEventListener('DOMContentLoaded', function() {
         lmBtn.addEventListener('click', function() {
             selectedBrand = 'LM';
             hideBrandSelectScreen();
+            sendUserActionLog('selectBrand', { brand: 'LM' });
             startQuiz();
         });
         haBtn.addEventListener('click', function() {
             selectedBrand = 'HA';
             hideBrandSelectScreen();
+            sendUserActionLog('selectBrand', { brand: 'HA' });
             startQuiz();
         });
     }
+});
+
+// ページ離脱時のアクションログ
+window.addEventListener('beforeunload', function() {
+    sendUserActionLog('leavePage', { currentScreen, currentQuestionIndex });
 });

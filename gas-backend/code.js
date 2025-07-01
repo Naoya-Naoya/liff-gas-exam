@@ -26,6 +26,10 @@ function doGet(e) {
     if (params.action === 'saveCompletion') {
       return saveCompletionLog(params);
     }
+    // ★ ユーザーアクションログ保存API
+    if (params.action === 'saveActionLog') {
+      return saveActionLog(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -177,6 +181,45 @@ function saveAnswerLog(params) {
   }
 }
 
+// ユーザーアクションログをスプレッドシートに保存
+function saveActionLog(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Actions');
+    if (!sheet) {
+      return ContentService
+        .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+    // 主要なパラメータを全て記録
+    sheet.appendRow([
+      'action',
+      params.timestamp || new Date().toISOString(),
+      params.userId || '',
+      params.userName || '',
+      params.actionType || '',
+      params.screen || '',
+      params.brand || '',
+      params.questionIndex || '',
+      params.answer || '',
+      params.isCorrect || '',
+      params.question || '',
+      params.correctAnswersCount || '',
+      params.totalQuestions || '',
+      params.accuracy || '',
+      params.currentScreen || '',
+    ]);
+    return ContentService
+      .createTextOutput('SUCCESS: Action log saved.')
+      .setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService
+      .createTextOutput('Spreadsheet Error: ' + error.message)
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
 // クイズ完了ログをスプレッドシートに保存
 function saveCompletionLog(params) {
   try {
@@ -198,7 +241,8 @@ function saveCompletionLog(params) {
       '', // answer
       '', // isCorrect
       params.correctAnswersCount || '',
-      params.totalQuestions || ''
+      params.totalQuestions || '',
+      params.accuracy || ''
     ]);
     return ContentService
       .createTextOutput('SUCCESS: Completion log saved.')
