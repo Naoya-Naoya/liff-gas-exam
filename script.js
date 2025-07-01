@@ -197,7 +197,6 @@ function showError(message) {
 async function startQuiz() {
     try {
         updateProgress(90, 'กำลังโหลดคำถาม...');
-
         // ブランド取得済みでなければ取得
         if (!userBrand && isBrandChecked === false) {
             userBrand = await fetchUserBrand();
@@ -210,8 +209,9 @@ async function startQuiz() {
         const data = await response.json();
         const today = new Date();
         today.setHours(0,0,0,0);
-
-        // ブランドでフィルタ
+        // デバッグ出力
+        console.log('userBrand:', userBrand);
+        console.log('取得したクイズデータ:', data);
         let filtered = data.filter(row => {
             const start = new Date(row.TermStart);
             const end = new Date(row.TermEnd);
@@ -220,9 +220,17 @@ async function startQuiz() {
             let brandMatch = true;
             if (userBrand && row.Brand) {
                 brandMatch = row.Brand === userBrand;
+                if (!brandMatch) {
+                    console.log('ブランド不一致:', row.Brand, userBrand);
+                }
             }
-            return today >= start && today <= end && brandMatch;
+            const inDate = today >= start && today <= end;
+            if (!inDate) {
+                console.log('日付範囲外:', row.TermStart, row.TermEnd, today);
+            }
+            return inDate && brandMatch;
         });
+        console.log('フィルタ後:', filtered);
         // 5問以上ならランダムで5問だけ抽出
         if (filtered.length > 5) {
             filtered = shuffleArray(filtered).slice(0, 5);
@@ -259,19 +267,19 @@ async function startQuiz() {
                 allOptions: allOptions
             };
         });
-
         currentQuestionIndex = 0;
         correctAnswersCount = 0;
         totalAnswerCount = 0;
         sendUserActionLog('startQuiz', { brand: userBrand });
-
         updateProgress(100, 'พร้อมแล้ว!');
-
         setTimeout(() => {
+            if (questions.length === 0) {
+                showError('このブランドのクイズがありません。管理者に連絡してください。');
+                return;
+            }
             showScreen('quiz');
             showQuestion();
         }, 500);
-
     } catch (error) {
         console.error('Quiz start failed:', error);
         showError('ไม่สามารถโหลดแบบทดสอบได้');
