@@ -47,7 +47,6 @@ function showScreen(screenName) {
     } else if (screenName === 'brandSelect') {
         document.getElementById('brandSelectScreen').style.display = 'block';
     }
-    sendUserActionLog('showScreen', { screen: screenName });
     currentScreen = screenName;
 }
 
@@ -257,12 +256,6 @@ function selectAnswer(selectedAnswer) {
     const isCorrect = String(selectedAnswer) === String(question.correctAnswer);
     totalAnswerCount++;
     const feedbackElement = document.getElementById('feedback');
-    sendUserActionLog('answer', {
-        questionIndex: currentQuestionIndex,
-        answer: selectedAnswer,
-        isCorrect: isCorrect,
-        question: question.question
-    });
     if (isCorrect) {
         feedbackElement.className = 'feedback correct show';
         feedbackElement.textContent = 'ถูกต้อง!';
@@ -325,12 +318,6 @@ function showCompletion() {
         คะแนน: ${percentage}%<br>
         เยี่ยมมาก!
     `;
-
-    sendUserActionLog('quizComplete', {
-        correctAnswersCount: correctAnswersCount,
-        totalQuestions: questions.length,
-        accuracy: percentage
-    });
 
     // GASに完了データを送信（オプション）
     if (userProfile && gasUrl) {
