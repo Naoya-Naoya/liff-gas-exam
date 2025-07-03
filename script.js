@@ -129,15 +129,27 @@ async function saveUserBrand(brand) {
 async function fetchUserBrand() {
     if (!userProfile) return '';
     const res = await fetch(`${gasUrl}?action=getBrand&userId=${encodeURIComponent(userProfile.userId)}`);
-    const data = await res.json();
-    return data.brand || '';
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        return data.brand || '';
+    } else {
+        const text = await res.text();
+        throw new Error(text);
+    }
 }
 
 // ユーザーステータス取得API
 async function fetchUserStatus() {
     if (!userProfile) return null;
     const res = await fetch(`${gasUrl}?action=getUserStatus&userId=${encodeURIComponent(userProfile.userId)}`);
-    return await res.json();
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+        return await res.json();
+    } else {
+        const text = await res.text();
+        throw new Error(text);
+    }
 }
 
 // クイズスタートボタンイベント

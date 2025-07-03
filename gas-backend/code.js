@@ -271,11 +271,11 @@ function getBrand(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON);
     }
     const userId = params.userId;
     if (!userId) {
-      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON);
     }
     const values = sheet.getDataRange().getValues();
     for (let i = 1; i < values.length; i++) {
@@ -297,11 +297,11 @@ function getUserStatus(params) {
     const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
     const profilesSheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!clearsSheet || !profilesSheet) {
-      return ContentService.createTextOutput('Error: Sheet not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet not found' })).setMimeType(ContentService.MimeType.JSON);
     }
     const userId = params.userId;
     if (!userId) {
-      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON);
     }
     const now = new Date();
     const todayStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
