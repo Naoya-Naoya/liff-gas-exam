@@ -310,7 +310,7 @@ function getUserStatus(params) {
     // 今日のクリア数
     const todayCount = clears.filter(row => row[1] === todayStr).length;
     // 今月のノルマ達成日数
-    const monthDays = new Set(clears.filter(row => (row[1] || '').startsWith(monthStr) && row[2]).map(row => row[1]));
+    const monthDays = new Set(clears.filter(row => String(row[1] || '').startsWith(monthStr) && row[2]).map(row => row[1]));
     const monthStatus = monthDays.size;
     // 最新10回履歴
     const recent = clears.slice(-10).reverse().map(row => ({ dateTime: row[2], accuracy: row[3] }));
