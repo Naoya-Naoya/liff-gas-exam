@@ -536,12 +536,6 @@ document.addEventListener('DOMContentLoaded', function() {
             showDashboard(status);
         });
     }
-
-    // クイズスタートボタン
-    const startQuizBtn = document.getElementById('startQuizBtn');
-    if (startQuizBtn) {
-        startQuizBtn.addEventListener('click', onStartQuiz);
-    }
 });
 
 // ページ離脱時のアクションログ
