@@ -304,8 +304,8 @@ function getUserStatus(params) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON);
     }
     const now = new Date();
-    const todayStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
-    const monthStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM');
+    const todayStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyy-MM-dd');
+    const monthStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyy-MM');
     const clears = clearsSheet.getDataRange().getValues().filter(row => row[0] === userId);
     // 今日のクリア数（日付型・シリアル値・文字列型すべて対応）
     const todayCount = clears.filter(row => {
