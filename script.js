@@ -29,6 +29,20 @@ function updateHeaderUserInfo(name, avatarUrl) {
             avatarElement.src = 'https://placehold.co/100x100/4CAF50/FFFFFF?text=U';
         };
     }
+    // ログアウトボタン設置（なければ追加）
+    if (!document.getElementById('logoutBtn')) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.textContent = 'ログアウト';
+        logoutBtn.style.marginLeft = '10px';
+        logoutBtn.onclick = function() {
+            if (window.liff) {
+                liff.logout();
+            }
+            location.reload();
+        };
+        avatarElement.parentNode.appendChild(logoutBtn);
+    }
 }
 
 // 画面切り替え
@@ -170,6 +184,7 @@ async function onStartQuiz() {
 
 // LIFF初期化
 async function initializeLiff() {
+    console.log('initializeLiff called', liff.isLoggedIn());
     try {
         updateProgress(20, 'กำลังเชื่อมต่อ LIFF...');
         
