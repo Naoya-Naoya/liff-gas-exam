@@ -184,11 +184,10 @@ async function onStartQuiz() {
 
 // LIFF初期化
 async function initializeLiff() {
-    console.log('initializeLiff called', liff.isLoggedIn());
     try {
         updateProgress(20, 'กำลังเชื่อมต่อ LIFF...');
-        
         await liff.init({ liffId: "2007507724-jxmBZwP0" });
+        console.log('initializeLiff called', liff.isLoggedIn());
         updateProgress(40, 'LIFF เชื่อมต่อสำเร็จ');
         
         if (!liff.isLoggedIn()) {
