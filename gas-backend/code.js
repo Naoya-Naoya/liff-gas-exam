@@ -313,7 +313,6 @@ function getUserStatus(params) {
       if (row[1] instanceof Date) {
         dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
       } else if (typeof row[1] === 'number') {
-        // スプレッドシートの日付シリアル値をDateに変換
         const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
         dateStr = Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
       } else {
@@ -322,7 +321,9 @@ function getUserStatus(params) {
       return dateStr === todayStr;
     }).length;
     // 今月のノルマ達成日数（日付型・シリアル値・文字列型すべて対応）
-    const monthDays = new Set(clears.filter(row => {
+    // 1日に3回クリアした日だけをカウント
+    const clearsByDay = {};
+    clears.forEach(row => {
       let dateStr = '';
       if (row[1] instanceof Date) {
         dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
@@ -332,18 +333,11 @@ function getUserStatus(params) {
       } else {
         dateStr = String(row[1]);
       }
-      return dateStr.startsWith(monthStr) && row[2];
-    }).map(row => {
-      if (row[1] instanceof Date) {
-        return Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
-      } else if (typeof row[1] === 'number') {
-        const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
-        return Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
-      } else {
-        return String(row[1]);
+      if (dateStr.startsWith(monthStr)) {
+        clearsByDay[dateStr] = (clearsByDay[dateStr] || 0) + 1;
       }
-    }));
-    const monthStatus = monthDays.size;
+    });
+    const monthStatus = Object.values(clearsByDay).filter(count => count >= 3).length;
     // 最新10回履歴（タイの仏歴で 'd MMM yy  hh:mm' 形式で表示）
     const recent = clears.slice(-10).reverse().map(row => {
       let dateObj = null;
@@ -414,8 +408,8 @@ function saveCompletionLog(params) {
     const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
     if (clearsSheet) {
       const now = new Date();
-      const dateStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
-      const dateTimeStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+      const dateStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyy-MM-dd');
+      const dateTimeStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
       clearsSheet.appendRow([
         params.userId || '',
         dateStr,
