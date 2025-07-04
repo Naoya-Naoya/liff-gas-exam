@@ -307,21 +307,28 @@ function getUserStatus(params) {
     const todayStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
     const monthStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM');
     const clears = clearsSheet.getDataRange().getValues().filter(row => row[0] === userId);
-    // 今日のクリア数（日付型にも対応）
+    // 今日のクリア数（日付型・シリアル値・文字列型すべて対応）
     const todayCount = clears.filter(row => {
       let dateStr = '';
       if (row[1] instanceof Date) {
         dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else if (typeof row[1] === 'number') {
+        // スプレッドシートの日付シリアル値をDateに変換
+        const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
+        dateStr = Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
       } else {
         dateStr = String(row[1]);
       }
       return dateStr === todayStr;
     }).length;
-    // 今月のノルマ達成日数（日付型にも対応）
+    // 今月のノルマ達成日数（日付型・シリアル値・文字列型すべて対応）
     const monthDays = new Set(clears.filter(row => {
       let dateStr = '';
       if (row[1] instanceof Date) {
         dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else if (typeof row[1] === 'number') {
+        const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
+        dateStr = Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
       } else {
         dateStr = String(row[1]);
       }
@@ -329,13 +336,41 @@ function getUserStatus(params) {
     }).map(row => {
       if (row[1] instanceof Date) {
         return Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else if (typeof row[1] === 'number') {
+        const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
+        return Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
       } else {
         return String(row[1]);
       }
     }));
     const monthStatus = monthDays.size;
-    // 最新10回履歴
-    const recent = clears.slice(-10).reverse().map(row => ({ dateTime: row[2], accuracy: row[3] }));
+    // 最新10回履歴（タイの仏歴で 'd MMM yy  hh:mm' 形式で表示）
+    const recent = clears.slice(-10).reverse().map(row => {
+      let dateObj = null;
+      if (row[2] instanceof Date) {
+        dateObj = row[2];
+      } else if (typeof row[2] === 'number') {
+        dateObj = new Date(Math.round((row[2] - 25569) * 86400 * 1000));
+      } else if (typeof row[2] === 'string' && row[2]) {
+        // ISO文字列や 'yyyy-MM-dd HH:mm:ss' 形式をDateに変換
+        dateObj = new Date(row[2].replace(' ', 'T'));
+      }
+      let formatted = row[2];
+      if (dateObj && !isNaN(dateObj.getTime())) {
+        // 仏歴（西暦+543年）
+        const buddhistYear = dateObj.getFullYear() + 543;
+        const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        const weekdayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+        const day = dateObj.getDate();
+        const month = monthNames[dateObj.getMonth()];
+        const year = String(buddhistYear).slice(-2);
+        const hour = String(dateObj.getHours()).padStart(2, '0');
+        const min = String(dateObj.getMinutes()).padStart(2, '0');
+        const weekday = weekdayNames[dateObj.getDay()];
+        formatted = `${day} ${month} ${year} (${weekday})  ${hour}:${min}`;
+      }
+      return { dateTime: formatted, accuracy: row[3] };
+    });
     // ブランド
     let brand = '';
     const profiles = profilesSheet.getDataRange().getValues();
