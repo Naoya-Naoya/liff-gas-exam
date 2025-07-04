@@ -565,3 +565,14 @@ function hideAllScreens() {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('errorScreen').style.display = 'none';
 }
+
+// completion画面からダッシュボードに戻る
+function showDashboardFromCompletion() {
+    hideAllScreens();
+    // ユーザーステータスを再取得してダッシュボードを表示
+    fetchUserStatus().then(status => {
+        showDashboard(status);
+    }).catch(e => {
+        showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
+    });
+}
