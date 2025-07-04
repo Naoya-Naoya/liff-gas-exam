@@ -307,10 +307,32 @@ function getUserStatus(params) {
     const todayStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
     const monthStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM');
     const clears = clearsSheet.getDataRange().getValues().filter(row => row[0] === userId);
-    // 今日のクリア数
-    const todayCount = clears.filter(row => row[1] === todayStr).length;
-    // 今月のノルマ達成日数
-    const monthDays = new Set(clears.filter(row => String(row[1] || '').startsWith(monthStr) && row[2]).map(row => row[1]));
+    // 今日のクリア数（日付型にも対応）
+    const todayCount = clears.filter(row => {
+      let dateStr = '';
+      if (row[1] instanceof Date) {
+        dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else {
+        dateStr = String(row[1]);
+      }
+      return dateStr === todayStr;
+    }).length;
+    // 今月のノルマ達成日数（日付型にも対応）
+    const monthDays = new Set(clears.filter(row => {
+      let dateStr = '';
+      if (row[1] instanceof Date) {
+        dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else {
+        dateStr = String(row[1]);
+      }
+      return dateStr.startsWith(monthStr) && row[2];
+    }).map(row => {
+      if (row[1] instanceof Date) {
+        return Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+      } else {
+        return String(row[1]);
+      }
+    }));
     const monthStatus = monthDays.size;
     // 最新10回履歴
     const recent = clears.slice(-10).reverse().map(row => ({ dateTime: row[2], accuracy: row[3] }));
@@ -353,20 +375,18 @@ function saveCompletionLog(params) {
       params.totalQuestions || '',
       params.accuracy || ''
     ]);
-    // ★ 5問全問正解ならLIFF_User_Clearsに記録
-    if (Number(params.correctAnswersCount) === Number(params.totalQuestions) && Number(params.totalQuestions) > 0) {
-      const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
-      if (clearsSheet) {
-        const now = new Date();
-        const dateStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
-        const dateTimeStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
-        clearsSheet.appendRow([
-          params.userId || '',
-          dateStr,
-          dateTimeStr,
-          params.accuracy || ''
-        ]);
-      }
+    // 5問全問正解でなくても必ずLIFF_User_Clearsに記録
+    const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
+    if (clearsSheet) {
+      const now = new Date();
+      const dateStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
+      const dateTimeStr = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+      clearsSheet.appendRow([
+        params.userId || '',
+        dateStr,
+        dateTimeStr,
+        params.accuracy || ''
+      ]);
     }
     return ContentService
       .createTextOutput('SUCCESS: Completion log saved.')
