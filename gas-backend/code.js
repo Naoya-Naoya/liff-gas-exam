@@ -311,10 +311,10 @@ function getUserStatus(params) {
     const todayCount = clears.filter(row => {
       let dateStr = '';
       if (row[1] instanceof Date) {
-        dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+        dateStr = Utilities.formatDate(row[1], 'Asia/Bangkok', 'yyyy-MM-dd');
       } else if (typeof row[1] === 'number') {
         const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
-        dateStr = Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
+        dateStr = Utilities.formatDate(jsDate, 'Asia/Bangkok', 'yyyy-MM-dd');
       } else {
         dateStr = String(row[1]);
       }
@@ -326,10 +326,10 @@ function getUserStatus(params) {
     clears.forEach(row => {
       let dateStr = '';
       if (row[1] instanceof Date) {
-        dateStr = Utilities.formatDate(row[1], 'Asia/Tokyo', 'yyyy-MM-dd');
+        dateStr = Utilities.formatDate(row[1], 'Asia/Bangkok', 'yyyy-MM-dd');
       } else if (typeof row[1] === 'number') {
         const jsDate = new Date(Math.round((row[1] - 25569) * 86400 * 1000));
-        dateStr = Utilities.formatDate(jsDate, 'Asia/Tokyo', 'yyyy-MM-dd');
+        dateStr = Utilities.formatDate(jsDate, 'Asia/Bangkok', 'yyyy-MM-dd');
       } else {
         dateStr = String(row[1]);
       }
@@ -374,7 +374,7 @@ function getUserStatus(params) {
         break;
       }
     }
-    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand, clearsByDay })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }
