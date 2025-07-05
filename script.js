@@ -101,47 +101,75 @@ async function sendUserActionLog(actionType, extra = {}) {
 // ダッシュボード画面の表示
 function showDashboard(status) {
     try {
+        showScreen('dashboard');
+        console.log('[DEBUG] showDashboard開始', status);
+        // 画面非表示
         hideAllScreens();
-        console.log(status);
-        console.log('showDashboard呼び出し');
-        document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
-        document.getElementById('monthStatus').textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
-        
-        // 星マークの更新
+        console.log('[DEBUG] hideAllScreens実行');
+        // todayStatus
+        const todayStatusElem = document.getElementById('todayStatus');
+        if (todayStatusElem) {
+            todayStatusElem.textContent = `今日のクリア数: ${status.todayCount} / 3`;
+            console.log('[DEBUG] todayStatusセット', todayStatusElem.textContent);
+        } else {
+            console.warn('[DEBUG] todayStatus要素が見つかりません');
+        }
+        // monthStatus
+        const monthStatusElem = document.getElementById('monthStatus');
+        if (monthStatusElem) {
+            monthStatusElem.textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
+            console.log('[DEBUG] monthStatusセット', monthStatusElem.textContent);
+        } else {
+            console.warn('[DEBUG] monthStatus要素が見つかりません');
+        }
+        // 星マーク
+        console.log('[DEBUG] 星マーク更新', status.todayCount);
         updateStarDisplay(status.todayCount);
-        
         // 進捗バー
         const progressBar = document.getElementById('dashboardProgressBar');
         if (progressBar) {
             const percent = Math.min(100, Math.round((status.monthStatus / 20) * 100));
             progressBar.style.width = percent + '%';
+            console.log('[DEBUG] 進捗バー更新', percent + '%');
+        } else {
+            console.warn('[DEBUG] dashboardProgressBar要素が見つかりません');
         }
-        // チャート描画
+        // チャート
         if (status.clearsByDay) {
+            console.log('[DEBUG] チャート描画', status.clearsByDay);
             drawDashboardChart(status.clearsByDay);
         } else {
-            // 空でもクリア
+            console.log('[DEBUG] チャートデータなし、空で描画');
             drawDashboardChart({});
         }
+        // 直近履歴
         const recentList = document.getElementById('recentClears');
-        recentList.innerHTML = '';
-        if (Array.isArray(status.recent)) {
-            status.recent.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.dateTime}　${item.accuracy}%`;
-                recentList.appendChild(li);
-            });
+        if (recentList) {
+            recentList.innerHTML = '';
+            if (Array.isArray(status.recent)) {
+                status.recent.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.dateTime}　${item.accuracy}%`;
+                    recentList.appendChild(li);
+                });
+                console.log('[DEBUG] recent履歴セット', status.recent);
+            } else {
+                console.log('[DEBUG] status.recentが配列ではありません:', status.recent);
+            }
         } else {
-            console.log('status.recentが配列ではありません:', status.recent);
+            console.warn('[DEBUG] recentClears要素が見つかりません');
         }
-        // クイズスタートボタンのイベントを毎回バインド
+        // クイズスタートボタン
         const startQuizBtn = document.getElementById('startQuizBtn');
         if (startQuizBtn) {
             startQuizBtn.onclick = onStartQuiz;
+            console.log('[DEBUG] startQuizBtnイベントバインド');
+        } else {
+            console.warn('[DEBUG] startQuizBtn要素が見つかりません');
         }
+        console.log('[DEBUG] showDashboard終了');
     } catch (e) {
-        console.error('showDashboardでエラー:', e, status);
+        console.error('[DEBUG] showDashboardでエラー:', e, status);
         showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
     }
 }
