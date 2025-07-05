@@ -555,7 +555,7 @@ body {
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   padding: 10px 10px 10px 10px;
   margin: 10px auto 0 auto;
-  max-width: 800px;
+  max-width: 600px;
   min-width: 260px;
   min-height: 220px;
   max-height: 100vh;
@@ -595,14 +595,19 @@ body {
 .star {
   font-size: 16px;
   color: #ffd700;
+  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
 }
 
 .star.empty {
-  color: #e0e0e0;
+  color: transparent;
+  -webkit-text-stroke: 1px #e0e0e0;
+  text-stroke: 1px #e0e0e0;
 }
 
 .star.achieved {
   color: #ffd700;
+  -webkit-text-stroke: 1px #ffd700;
+  text-stroke: 1px #ffd700;
   animation: starPulse 0.6s ease-in-out;
 }
 

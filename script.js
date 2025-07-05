@@ -154,7 +154,7 @@ function updateStarDisplay(todayCount) {
     while (stars.length < maxStars) {
         const newStar = document.createElement('span');
         newStar.className = 'star empty';
-        newStar.textContent = '⭐';
+        newStar.textContent = '☆';
         starContainer.appendChild(newStar);
     }
     
