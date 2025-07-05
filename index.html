@@ -15,7 +15,7 @@
 <div class="container">
     <div class="header">
         <div class="header-left">
-            <h1>แบบทดสอบวันนี้DAS1</h1>
+            <h1>แบบทดสอบวันนี้DA</h1>
         </div>
         <div class="user-info">
             <div class="user-name" id="userName">กำลังโหลด...</div>
@@ -81,7 +81,15 @@
         <!-- ダッシュボード画面をmain-content内に移動 -->
         <div id="dashboard" style="display:none;">
             <h2>ノルマ進捗</h2>
-            <div id="todayStatus">今日のクリア数: 0 / 3</div>
+            <button id="startQuizBtn">今日のクイズスタート</button>
+            <div class="today-status-container">
+                <div id="todayStatus">今日のクリア数: 0 / 3</div>
+                <div class="star-container" id="starContainer">
+                    <span class="star empty">⭐</span>
+                    <span class="star empty">⭐</span>
+                    <span class="star empty">⭐</span>
+                </div>
+            </div>
             <div id="monthStatus">今月のノルマ達成日数: 0 / 20</div>
             <div class="dashboard-progress" style="width:100%;margin-bottom:10px;">
                 <div class="dashboard-progress-bar" id="dashboardProgressBar" style="width:0%"></div>
@@ -89,7 +97,6 @@
             <canvas id="dashboardChart" width="320" height="80" style="margin-bottom:10px;"></canvas>
             <h3>最新10回の全問正解履歴</h3>
             <ul id="recentClears"></ul>
-            <button id="startQuizBtn">今日のクイズスタート</button>
         </div>
     </div>
 </div>

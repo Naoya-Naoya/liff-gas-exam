@@ -103,6 +103,10 @@ function showDashboard(status) {
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
         document.getElementById('monthStatus').textContent = `今月のノルマ達成日数: ${status.monthStatus} / 20`;
+        
+        // 星マークの更新
+        updateStarDisplay(status.todayCount);
+        
         // 進捗バー
         const progressBar = document.getElementById('dashboardProgressBar');
         if (progressBar) {
@@ -136,6 +140,32 @@ function showDashboard(status) {
         console.error('showDashboardでエラー:', e, status);
         showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
     }
+}
+
+// 星マークの表示を更新
+function updateStarDisplay(todayCount) {
+    const starContainer = document.getElementById('starContainer');
+    if (!starContainer) return;
+    
+    const stars = starContainer.querySelectorAll('.star');
+    const maxStars = Math.max(3, todayCount); // 3回以上にも対応
+    
+    // 星の数を調整（必要に応じて追加）
+    while (stars.length < maxStars) {
+        const newStar = document.createElement('span');
+        newStar.className = 'star empty';
+        newStar.textContent = '⭐';
+        starContainer.appendChild(newStar);
+    }
+    
+    // 星の状態を更新
+    stars.forEach((star, index) => {
+        if (index < todayCount) {
+            star.className = 'star achieved';
+        } else {
+            star.className = 'star empty';
+        }
+    });
 }
 
 // 月間ノルマ達成日数の推移を棒グラフで描画
