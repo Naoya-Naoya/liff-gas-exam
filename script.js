@@ -172,27 +172,42 @@ function updateStarDisplay(todayCount) {
 function drawDashboardChart(clearsByDay) {
     const canvas = document.getElementById('dashboardChart');
     if (!canvas) return;
+    
+    // canvasの実際の表示サイズを取得
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = rect.width;
+    const displayHeight = rect.height;
+    
+    // canvasの描画サイズを表示サイズに合わせる
+    canvas.width = displayWidth;
+    canvas.height = displayHeight;
+    
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     // データ整形: 日付順で最大31日分
     const days = Object.keys(clearsByDay).sort();
     const data = days.map(day => clearsByDay[day]);
+    
     // 棒グラフ描画
     const w = canvas.width;
     const h = canvas.height;
     const barW = Math.max(6, Math.floor(w / Math.max(10, days.length || 10)));
     const maxVal = Math.max(3, ...data);
+    
     ctx.save();
     ctx.font = '10px sans-serif';
     ctx.strokeStyle = '#e0e0e0';
     ctx.beginPath();
     ctx.moveTo(0, h-20); ctx.lineTo(w, h-20); ctx.stroke();
+    
     // 棒
     data.forEach((val, i) => {
         const x = i * barW + 10;
         const y = h-20 - (val / maxVal) * (h-35);
         ctx.fillStyle = val >= 3 ? '#4caf50' : '#bdbdbd';
         ctx.fillRect(x, y, barW-2, h-20-y);
+        
         // 日付ラベル
         ctx.fillStyle = '#888';
         ctx.textAlign = 'center';
@@ -200,6 +215,7 @@ function drawDashboardChart(clearsByDay) {
             ctx.fillText(days[i].slice(-2), x+barW/2, h-6);
         }
     });
+    
     // 目標線
     ctx.strokeStyle = '#ff9800';
     const yGoal = h-20 - (3 / maxVal) * (h-35);
