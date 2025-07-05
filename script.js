@@ -731,7 +731,6 @@ window.addEventListener('beforeunload', function() {
 });
 
 function hideAllScreens() {
-    document.getElementById('dashboard').style.display = 'none';
     document.getElementById('brandSelectScreen').style.display = 'none';
     document.getElementById('quizScreen').style.display = 'none';
     document.getElementById('completionScreen').style.display = 'none';
