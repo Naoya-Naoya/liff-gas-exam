@@ -123,8 +123,9 @@ function showDashboard(status) {
             console.warn('[DEBUG] monthStatus要素が見つかりません');
         }
         // 星マーク
-        console.log('[DEBUG] 星マーク更新', status.todayCount);
+        console.log('[DEBUG] updateStarDisplay呼び出し直前', status.todayCount);
         updateStarDisplay(status.todayCount);
+        console.log('[DEBUG] updateStarDisplay呼び出し直後');
         // 進捗バー
         const progressBar = document.getElementById('dashboardProgressBar');
         if (progressBar) {
