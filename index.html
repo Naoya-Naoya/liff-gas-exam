@@ -7,15 +7,29 @@
     <!-- ダミーのfaviconを設定して404を防止 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔰</text></svg>">
     <link rel="stylesheet" href="styles.css">
-    
+    <style>
+    html, body, .container, .main-content {
+      overflow: visible !important;
+      height: auto !important;
+      min-height: 100vh !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    #dashboard, #dashboard * {
+      opacity: 1 !important;
+      visibility: visible !important;
+      color: #000 !important;
+    }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
+    <div style="position:fixed;top:100px;left:0;width:100vw;height:50px;background:blue;color:white;z-index:99999;text-align:center;line-height:50px;font-size:24px;">BODY直下テスト</div>
 <div class="container">
     <div class="header">
         <div class="header-left">
-            <h1>แบบทดสอบวันนี้MAX</h1>
+            <h1>แบบทดสอบวันนี้っれ5</h1>
         </div>
         <div class="user-info">
             <div class="user-name" id="userName">กำลังโหลด...</div>
