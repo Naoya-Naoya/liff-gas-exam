@@ -749,3 +749,11 @@ function showDashboardFromCompletion() {
         showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
     });
 }
+
+// 監視用: #dashboardのdisplayとinnerHTMLを500msごとに出力
+setInterval(() => {
+    const dash = document.getElementById('dashboard');
+    if (dash) {
+        console.log('[監視] #dashboard display:', dash.style.display, 'innerHTML:', dash.innerHTML);
+    }
+}, 500);
