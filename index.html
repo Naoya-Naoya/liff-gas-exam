@@ -26,10 +26,13 @@
 </head>
 <body>
     <div style="position:fixed;top:100px;left:0;width:100vw;height:50px;background:blue;color:white;z-index:99999;text-align:center;line-height:50px;font-size:24px;">BODY直下テスト</div>
+    <div id="dashboard" style="display:block; position:fixed; top:200px; left:0; width:100vw; z-index:9999;">
+        <div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">JS強制TEST</div>
+    </div>
 <div class="container">
     <div class="header">
         <div class="header-left">
-            <h1>แบบทดสอบวันนี้っQQ</h1>
+            <h1>แบบทดสอบวันนี้CAC</h1>
         </div>
         <div class="user-info">
             <div class="user-name" id="userName">กำลังโหลด...</div>
@@ -90,31 +93,6 @@
                 ผลการทำแบบทดสอบของคุณ
             </div>
             <button class="restart-button" onclick="showDashboardFromCompletion()">ダッシュボードに戻る</button>
-        </div>
-
-        <!-- ダッシュボード画面をmain-content内に移動 -->
-        <div id="dashboard" style="display:none; position:fixed; top:0; left:0; width:100vw; z-index:9999;">
-            <div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">TEST</div>
-            <button id="startQuizBtn">今日のクイズスタート</button>
-
-            <h2>ノルマ進捗</h2>
-            
-            <div class="today-status-container">
-                <div id="todayStatus">今日のクリア数: 0 / 3</div>
-                <div class="star-container" id="starContainer">
-                    <span class="star empty">☆</span>
-                    <span class="star empty">☆</span>
-                    <span class="star empty">☆</span>
-                </div>
-            </div>
-            <div id="monthStatus">今月のノルマ達成日数: 0 / 20</div>
-            <div class="dashboard-progress" style="width:100%;margin-bottom:10px;">
-                <div class="dashboard-progress-bar" id="dashboardProgressBar" style="width:0%"></div>
-            </div>
-            
-            <canvas id="dashboardChart" width="800" height="80" style="margin-bottom:10px; width: 100%; max-width: 100%;"></canvas>
-            <h3>最新10回の全問正解履歴</h3>
-            <ul id="recentClears"></ul>
         </div>
     </div>
 </div>
