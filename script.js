@@ -101,16 +101,6 @@ async function sendUserActionLog(actionType, extra = {}) {
 // ダッシュボード画面の表示
 function showDashboard(status) {
     try {
-        // 強制テスト: #dashboardの中身を書き換え
-        const dash = document.getElementById('dashboard');
-        if (dash) {
-            dash.innerHTML = '<div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">JS強制TEST</div>';
-            setTimeout(() => {
-                dash.innerHTML = '<div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">JS強制TEST(2秒後)</div>';
-            }, 2000);
-        } else {
-            console.warn('[DEBUG] #dashboard要素が見つかりません');
-        }
         showScreen('dashboard');
         console.log('[DEBUG] showDashboard開始', status);
         // 画面表示状態を確認
