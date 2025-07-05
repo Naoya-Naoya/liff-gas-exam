@@ -103,6 +103,13 @@ function showDashboard(status) {
     try {
         showScreen('dashboard');
         console.log('[DEBUG] showDashboard開始', status);
+        // 画面表示状態を確認
+        console.log('[DEBUG] loadingScreen display:', document.getElementById('loadingScreen').style.display);
+        console.log('[DEBUG] dashboard display:', document.getElementById('dashboard').style.display);
+        console.log('[DEBUG] errorScreen display:', document.getElementById('errorScreen').style.display);
+        console.log('[DEBUG] quizScreen display:', document.getElementById('quizScreen').style.display);
+        console.log('[DEBUG] completionScreen display:', document.getElementById('completionScreen').style.display);
+        console.log('[DEBUG] brandSelectScreen display:', document.getElementById('brandSelectScreen').style.display);
         // 画面非表示
         hideAllScreens();
         console.log('[DEBUG] hideAllScreens実行');
