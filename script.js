@@ -177,27 +177,39 @@ function showDashboard(status) {
 // 星マークの表示を更新
 function updateStarDisplay(todayCount) {
     const starContainer = document.getElementById('starContainer');
-    if (!starContainer) return;
-    
+    if (!starContainer) {
+        console.warn('[DEBUG] starContainer要素が見つかりません');
+        return;
+    }
     const stars = starContainer.querySelectorAll('.star');
     const maxStars = Math.max(3, todayCount); // 3回以上にも対応
-    
+    console.log('[DEBUG] 星マーク: 既存', stars.length, '必要', maxStars);
+
     // 星の数を調整（必要に応じて追加）
-    while (stars.length < maxStars) {
+    let loopCount = 0;
+    while (starContainer.querySelectorAll('.star').length < maxStars) {
         const newStar = document.createElement('span');
         newStar.className = 'star empty';
         newStar.textContent = '☆';
         starContainer.appendChild(newStar);
+        loopCount++;
+        if (loopCount > 10) {
+            console.error('[DEBUG] 星追加ループ異常終了');
+            break;
+        }
     }
-    
+    console.log('[DEBUG] 星追加ループ終了');
+
     // 星の状態を更新
-    stars.forEach((star, index) => {
+    const updatedStars = starContainer.querySelectorAll('.star');
+    updatedStars.forEach((star, index) => {
         if (index < todayCount) {
             star.className = 'star achieved';
         } else {
             star.className = 'star empty';
         }
     });
+    console.log('[DEBUG] 星状態更新完了');
 }
 
 // 月間ノルマ達成日数の推移を棒グラフで描画
