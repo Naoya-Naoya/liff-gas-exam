@@ -96,16 +96,27 @@ function handleProfileData(data) {
         .setMimeType(ContentService.MimeType.TEXT);
     }
     
-    const timestamp = new Date();
-    sheet.appendRow([
-      timestamp,
-      data.displayName || 'Unknown',
-      data.userId || 'Unknown',
-      data.pictureUrl || ''
-    ]);
-    
+    // 既にuserIdが存在するかチェック
+    const values = sheet.getDataRange().getValues();
+    const userId = data.userId || 'Unknown';
+    let exists = false;
+    for (let i = 1; i < values.length; i++) { // 1行目はヘッダー想定
+      if (values[i][2] === userId) { // userId列
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      const timestamp = new Date();
+      sheet.appendRow([
+        timestamp,
+        data.displayName || 'Unknown',
+        userId,
+        data.pictureUrl || ''
+      ]);
+    }
     return ContentService
-      .createTextOutput('SUCCESS: Profile data saved to spreadsheet. User: ' + data.displayName)
+      .createTextOutput('SUCCESS: Profile data checked/added. User: ' + data.displayName)
       .setMimeType(ContentService.MimeType.TEXT);
       
   } catch (error) {
