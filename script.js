@@ -99,6 +99,7 @@ async function sendUserActionLog(actionType, extra = {}) {
 function showDashboard(status) {
     try {
         hideAllScreens();
+        console.log(status);
         console.log('showDashboard呼び出し');
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('todayStatus').textContent = `今日のクリア数: ${status.todayCount} / 3`;
