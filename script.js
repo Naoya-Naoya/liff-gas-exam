@@ -52,6 +52,7 @@ function showScreen(screenName) {
     document.getElementById('quizScreen').style.display = 'none';
     document.getElementById('completionScreen').style.display = 'none';
     document.getElementById('brandSelectScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'none';
     if (screenName === 'loading') {
         document.getElementById('loadingScreen').style.display = 'block';
     } else if (screenName === 'error') {
@@ -62,6 +63,8 @@ function showScreen(screenName) {
         document.getElementById('completionScreen').style.display = 'block';
     } else if (screenName === 'brandSelect') {
         document.getElementById('brandSelectScreen').style.display = 'block';
+    } else if (screenName === 'dashboard') {
+        document.getElementById('dashboard').style.display = 'block';
     }
     currentScreen = screenName;
 }
