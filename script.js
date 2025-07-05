@@ -286,51 +286,63 @@ async function onStartQuiz() {
 async function initializeLiff() {
     try {
         updateProgress(20, 'กำลังเชื่อมต่อ LIFF...');
+        console.log('[DEBUG] LIFF初期化開始');
         await liff.init({ liffId: "2007507724-jxmBZwP0" });
-        console.log('initializeLiff called', liff.isLoggedIn());
+        console.log('[DEBUG] liff.init完了', liff.isLoggedIn());
         updateProgress(40, 'LIFF เชื่อมต่อสำเร็จ');
         
         if (!liff.isLoggedIn()) {
             updateProgress(50, 'กำลังเข้าสู่ระบบ...');
+            console.log('[DEBUG] liff.isLoggedIn() == false, liff.login()呼び出し');
             liff.login();
             return;
         }
         
         // プロフィール取得
+        console.log('[DEBUG] liff.getProfile呼び出し');
         userProfile = await liff.getProfile();
+        console.log('[DEBUG] liff.getProfile完了', userProfile);
         updateProgress(60, 'กำลังโหลดข้อมูลผู้ใช้...');
 
         // ログイン情報をGASに記録
         try {
+            console.log('[DEBUG] GASへユーザープロフィール送信', gasUrl, userProfile);
             await fetch(`${gasUrl}?type=profileData&displayName=${encodeURIComponent(userProfile.displayName)}&userId=${encodeURIComponent(userProfile.userId)}&pictureUrl=${encodeURIComponent(userProfile.pictureUrl)}`,
                 { method: 'GET', redirect: 'follow' });
+            console.log('[DEBUG] GASへのユーザープロフィール送信完了');
         } catch (e) {
-            console.warn('ユーザー情報の記録に失敗:', e);
+            console.warn('[DEBUG] ユーザー情報の記録に失敗:', e);
         }
         
         // ヘッダーにユーザー情報を表示
         updateHeaderUserInfo(userProfile.displayName, userProfile.pictureUrl);
+        console.log('[DEBUG] ユーザー情報をヘッダーに反映');
         
         updateProgress(80, 'กำลังโหลดแบบทดสอบ...');
         
         // ログインアクションログ
         sendUserActionLog('login');
+        console.log('[DEBUG] sendUserActionLog(login)呼び出し');
         
         // ブランド取得
+        console.log('[DEBUG] fetchUserBrand呼び出し');
         userBrand = await fetchUserBrand();
+        console.log('[DEBUG] fetchUserBrand完了', userBrand);
         isBrandChecked = true;
         if (!userBrand) {
-            console.log('ブランド未登録、ブランド選択画面へ');
+            console.log('[DEBUG] ブランド未登録、ブランド選択画面へ');
             showBrandSelectScreenForFirst();
             return;
         }
         // ステータス取得
+        console.log('[DEBUG] fetchUserStatus呼び出し');
         const status = await fetchUserStatus();
-        console.log('ブランド登録済み、ダッシュボードへ', status);
+        console.log('[DEBUG] fetchUserStatus完了', status);
+        console.log('[DEBUG] ブランド登録済み、ダッシュボードへ', status);
         showDashboard(status);
         
     } catch (e) {
-        console.error("LIFF initialization failed", e);
+        console.error('[DEBUG] LIFF initialization failed', e);
         showError('ไม่สามารถเชื่อมต่อ LIFF ได้: ' + e.message);
     }
 }
