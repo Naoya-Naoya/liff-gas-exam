@@ -105,6 +105,9 @@ function showDashboard(status) {
         const dash = document.getElementById('dashboard');
         if (dash) {
             dash.innerHTML = '<div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">JS強制TEST</div>';
+            setTimeout(() => {
+                dash.innerHTML = '<div style="height:50px;background:red;color:white;text-align:center;line-height:50px;font-size:24px;">JS強制TEST(2秒後)</div>';
+            }, 2000);
         } else {
             console.warn('[DEBUG] #dashboard要素が見つかりません');
         }
