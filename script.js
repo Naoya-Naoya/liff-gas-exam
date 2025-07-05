@@ -116,7 +116,7 @@ function showDashboard(status) {
         // todayStatus
         const todayStatusElem = document.getElementById('todayStatus');
         if (todayStatusElem) {
-            todayStatusElem.textContent = `今日のクリア数: ${status.todayCount} ครั้ง / เป้า 3 ครั้ง`;
+            todayStatusElem.textContent = `สำเร็จวันนี้: ${status.todayCount} ครั้ง / เป้า 3 ครั้ง`;
             console.log('[DEBUG] todayStatusセット', todayStatusElem.textContent);
         } else {
             console.warn('[DEBUG] todayStatus要素が見つかりません');
@@ -124,7 +124,7 @@ function showDashboard(status) {
         // monthStatus
         const monthStatusElem = document.getElementById('monthStatus');
         if (monthStatusElem) {
-            monthStatusElem.textContent = `今月のノルマ達成日数: ${status.monthStatus} วัน / เป้า 20 วัน`;
+            monthStatusElem.textContent = `จำนวนวันสำเร็จเป้าในเดือนนี้: ${status.monthStatus} วัน / เป้า 20 วัน`;
             console.log('[DEBUG] monthStatusセット', monthStatusElem.textContent);
         } else {
             console.warn('[DEBUG] monthStatus要素が見つかりません');
