@@ -12,6 +12,7 @@ let currentScreen = 'loading';
 let selectedBrand = null;
 let userBrand = null;
 let isBrandChecked = false;
+let userAuthType = 'User'; // デフォルトはUser
 
 // プログレスバー更新
 function updateProgress(percentage, text) {
@@ -306,7 +307,9 @@ async function fetchUserStatus() {
     const res = await fetch(`${gasUrl}?action=getUserStatus&userId=${encodeURIComponent(userProfile.userId)}`);
     const contentType = res.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
-        return await res.json();
+        const data = await res.json();
+        userAuthType = data.auth || 'User'; // ここでグローバル変数に保存
+        return data;
     } else {
         const text = await res.text();
         throw new Error(text);
@@ -735,13 +738,49 @@ function showDashboardFromCompletion() {
     });
 }
 
+// サイドメニューの動的生成
+function renderSideMenu() {
+    const sideMenuNav = document.querySelector('.side-menu-nav');
+    if (!sideMenuNav) return;
+    let html = '<ul class="menu-items">';
+    // ユーザー共通メニュー
+    html += '<li><a href="#" class="menu-item" data-action="dashboard">ダッシュボード</a></li>';
+    html += '<li><a href="#" class="menu-item" data-action="total-status">Total Status</a></li>';
+    html += '<li><a href="#" class="menu-item" data-action="user-management">User管理</a></li>';
+    // 管理者専用メニュー
+    if (userAuthType === 'Admin') {
+        html += '<li><a href="#" class="menu-item" data-action="settings">設定</a></li>';
+        html += '<li><a href="#" class="menu-item" data-action="help">ヘルプ</a></li>';
+        html += '<li><a href="#" class="menu-item" data-action="about">アプリについて</a></li>';
+        html += '<li><a href="#" class="menu-item" data-action="notifications">通知設定</a></li>';
+        html += '<li><a href="#" class="menu-item" data-action="privacy">プライバシー</a></li>';
+        html += '<li><a href="#" class="menu-item" data-action="terms">利用規約</a></li>';
+    }
+    html += '<li><a href="#" class="menu-item" data-action="logout">ログアウト</a></li>';
+    html += '</ul>';
+    sideMenuNav.innerHTML = html;
+}
+
 // バーガーメニュー機能
 function initializeMenu() {
     const burgerMenuBtn = document.getElementById('burgerMenuBtn');
     const closeMenuBtn = document.getElementById('closeMenuBtn');
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
+
+    // サイドメニューを権限ごとに描画
+    renderSideMenu();
+
+    // メニューアイテムのクリックイベント再バインド
     const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = item.getAttribute('data-action');
+            handleMenuAction(action);
+            closeMenu();
+        });
+    });
 
     // バーガーメニューボタンのクリックイベント
     if (burgerMenuBtn) {
@@ -763,16 +802,6 @@ function initializeMenu() {
             closeMenu();
         });
     }
-
-    // メニューアイテムのクリックイベント
-    menuItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const action = item.getAttribute('data-action');
-            handleMenuAction(action);
-            closeMenu();
-        });
-    });
 
     // ESCキーでメニューを閉じる
     document.addEventListener('keydown', (e) => {
@@ -899,9 +928,6 @@ function handleMenuAction(action) {
 
 // ページ読み込み時の初期化
 document.addEventListener('DOMContentLoaded', function() {
-    // 既存の初期化処理
     initializeLiff();
-    
-    // メニュー機能の初期化
-    initializeMenu();
+    // メニュー機能の初期化は、ユーザー情報取得後に呼ぶ
 });

@@ -219,7 +219,8 @@ body {
     font-size: 24px;
     font-weight: 600;
     margin: 0;
-    line-height: 40px;
+    height: 40px;
+    line-height: normal;
     display: flex;
     align-items: center;
 }

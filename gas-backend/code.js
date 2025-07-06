@@ -376,16 +376,18 @@ function getUserStatus(params) {
       }
       return { dateTime: formatted, accuracy: row[3] };
     });
-    // ブランド
+    // ブランド・権限
     let brand = '';
+    let auth = '';
     const profiles = profilesSheet.getDataRange().getValues();
     for (let i = 1; i < profiles.length; i++) {
       if (profiles[i][2] === userId) {
         brand = profiles[i][4] || '';
+        auth = profiles[i][5] || '';
         break;
       }
     }
-    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand, clearsByDay })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand, auth, clearsByDay })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }
