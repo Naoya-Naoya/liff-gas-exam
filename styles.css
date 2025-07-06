@@ -225,6 +225,11 @@ body {
     padding: 8px 0;
 }
 
+.header h1 span {
+    display: flex;
+    align-items: center;
+}
+
 
 .progress-section {
     width: 100%;
