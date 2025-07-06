@@ -389,6 +389,10 @@ async function initializeLiff() {
         const status = await fetchUserStatus();
         console.log('[DEBUG] fetchUserStatus完了', status);
         console.log('[DEBUG] ブランド登録済み、ダッシュボードへ', status);
+
+        // ★ここでサイドメニュー初期化
+        initializeMenu();
+
         showDashboard(status);
         
     } catch (e) {
