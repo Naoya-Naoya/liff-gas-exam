@@ -58,6 +58,10 @@ function doGet(e) {
     if (params.action === 'saveAuth') {
       return saveAuth(params);
     }
+    // ★ ユーザープロファイル一括更新API
+    if (params.action === 'updateUserProfile') {
+      return updateUserProfile(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -584,6 +588,41 @@ function saveAuth(params) {
       sheet.appendRow(row);
     }
     return ContentService.createTextOutput('SUCCESS: Auth saved').setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ユーザープロファイル一括更新API
+function updateUserProfile(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    if (!userId) {
+      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][2] === userId) { // userId列
+        if (params.brand !== undefined) sheet.getRange(i+1, 5).setValue(params.brand);
+        if (params.auth !== undefined) sheet.getRange(i+1, 6).setValue(params.auth);
+        if (params.shop !== undefined) sheet.getRange(i+1, 7).setValue(params.shop);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // 新規の場合は全ての値で追加
+      const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', params.brand || '', params.auth || '', params.shop || ''];
+      sheet.appendRow(row);
+    }
+    return ContentService.createTextOutput('SUCCESS: User profile updated').setMimeType(ContentService.MimeType.TEXT);
   } catch (error) {
     return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }

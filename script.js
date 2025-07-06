@@ -999,6 +999,8 @@ window.addEventListener('DOMContentLoaded', setupBrandSelectEvents);
 async function showUserManagementScreen() {
     hideAllScreens();
     document.getElementById('userManagementScreen').style.display = 'block';
+    // ダッシュボード非表示
+    document.getElementById('dashboard').style.display = 'none';
     // ユーザー一覧取得
     const userListContainer = document.getElementById('userListContainer');
     userListContainer.innerHTML = '<div class="loading">ユーザー一覧を取得中...</div>';
@@ -1009,7 +1011,7 @@ async function showUserManagementScreen() {
             userListContainer.innerHTML = '<div>ユーザーが見つかりません</div>';
             return;
         }
-        let html = '<table style="margin:0 auto; border-collapse:separate; border-spacing:0 8px; width:90%; max-width:600px;">';
+        let html = '<table class="user-list-table">';
         html += '<tr><th>アバター</th><th>名前</th><th>Brand</th><th>Shop</th><th>Auth</th><th>操作</th></tr>';
         users.forEach(user => {
             html += `<tr>` +
@@ -1029,7 +1031,7 @@ async function showUserManagementScreen() {
                 const userId = btn.getAttribute('data-userid');
                 const user = users.find(u => u.userId === userId);
                 if (!user) return;
-                showUserEditDialog(user);
+                showUserEditOverlay(user);
             };
         });
     } catch (e) {
@@ -1037,22 +1039,46 @@ async function showUserManagementScreen() {
     }
 }
 
-// ユーザー編集ダイアログの表示
-function showUserEditDialog(user) {
-    // シンプルなダイアログUI（window.promptで代用）
-    // Brandは自分のブランドのみ、ShopとAuthは直接入力/選択
-    const newShop = window.prompt('Shopを入力してください', user.shop || '');
-    if (newShop === null) return; // キャンセル
-    const newAuth = window.prompt('Authを入力してください（Admin/User）', user.auth || 'User');
-    if (newAuth === null) return;
-    // 保存処理
-    Promise.all([
-        fetch(`${gasUrl}?action=saveShop&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&shopShortName=${encodeURIComponent(newShop)}`),
-        fetch(`${gasUrl}?action=saveAuth&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&auth=${encodeURIComponent(newAuth)}`)
-    ]).then(() => {
-        alert('保存しました');
-        showUserManagementScreen(); // 再描画
-    }).catch(() => {
-        alert('保存に失敗しました');
-    });
+// ユーザー編集オーバーレイの表示
+async function showUserEditOverlay(user) {
+    // オーバーレイ表示
+    const overlay = document.getElementById('userEditOverlay');
+    overlay.style.display = 'flex';
+    document.getElementById('editUserAvatar').src = user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U';
+    document.getElementById('editUserName').textContent = user.displayName || '';
+    document.getElementById('editUserBrand').value = user.brand || '';
+    // Shop選択肢を取得
+    const shopSelect = document.getElementById('editUserShop');
+    shopSelect.innerHTML = '<option value="">取得中...</option>';
+    try {
+        const res = await fetch(`${gasUrl}?action=getShops&brand=${encodeURIComponent(user.brand)}`);
+        const shops = await res.json();
+        shopSelect.innerHTML = '';
+        shops.forEach(shop => {
+            const opt = document.createElement('option');
+            opt.value = shop.ShortName;
+            opt.textContent = shop.FullName || shop.ShortName;
+            if (shop.ShortName === user.shop) opt.selected = true;
+            shopSelect.appendChild(opt);
+        });
+    } catch {
+        shopSelect.innerHTML = '<option value="">取得失敗</option>';
+    }
+    // Auth選択肢
+    document.getElementById('editUserAuth').value = user.auth || 'User';
+    // 保存・キャンセルイベント
+    document.getElementById('userEditCancelBtn').onclick = () => {
+        overlay.style.display = 'none';
+    };
+    document.getElementById('userEditForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const newShop = shopSelect.value;
+        const newAuth = document.getElementById('editUserAuth').value;
+        // Brandは自分のブランドのみ
+        const newBrand = user.brand;
+        // 保存API呼び出し
+        await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
+        overlay.style.display = 'none';
+        showUserManagementScreen();
+    };
 }

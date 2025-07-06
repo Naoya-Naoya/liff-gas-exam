@@ -19,7 +19,7 @@
                 <span></span>
                 <span></span>
             </button>
-            <h1>UpSkill+ <span style="font-size: 0.6em; font-weight: normal; color: #ffffff;">   Ver0.6</h1>span></h1>
+            <h1>UpSkill+ <span style="font-size: 0.6em; font-weight: normal; color: #ffffff;">   Ver0.61</span></h1>
         </div>
         <div class="user-info">
             <div class="user-name" id="userName">กำลังโหลด...</div>
@@ -140,6 +140,39 @@
             <div id="userListContainer" style="margin: 20px 0;"></div>
         </div>
         <!-- ここまでUser管理画面 -->
+
+        <!-- ユーザー編集オーバーレイ -->
+        <div id="userEditOverlay" class="user-edit-overlay" style="display:none;">
+            <div class="user-edit-modal">
+                <h3>ユーザー情報編集</h3>
+                <form id="userEditForm">
+                    <div class="user-edit-avatar-name">
+                        <img id="editUserAvatar" src="" alt="avatar" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">
+                        <span id="editUserName"></span>
+                    </div>
+                    <div class="user-edit-row">
+                        <label>Brand</label>
+                        <input type="text" id="editUserBrand" readonly>
+                    </div>
+                    <div class="user-edit-row">
+                        <label>Shop</label>
+                        <select id="editUserShop"></select>
+                    </div>
+                    <div class="user-edit-row">
+                        <label>Auth</label>
+                        <select id="editUserAuth">
+                            <option value="User">User</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="user-edit-actions">
+                        <button type="button" id="userEditCancelBtn">キャンセル</button>
+                        <button type="submit" id="userEditSaveBtn">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ここまでユーザー編集オーバーレイ -->
     </div>
 </div>
     <script src="script.js" defer></script>
