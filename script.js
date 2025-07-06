@@ -935,3 +935,62 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeLiff();
     // メニュー機能の初期化は、ユーザー情報取得後に呼ぶ
 });
+
+// ショップ選択画面の表示
+function showShopSelectScreen(brand) {
+    hideAllScreens();
+    const shopScreen = document.getElementById('shopSelectScreen');
+    const shopOptionsDiv = document.getElementById('shopOptions');
+    shopOptionsDiv.innerHTML = '<div class="loading">ショップ一覧を取得中...</div>';
+    shopScreen.style.display = 'block';
+    // GASからショップリスト取得
+    fetch(`${gasUrl}?action=getShops&brand=${encodeURIComponent(brand)}`)
+        .then(res => res.json())
+        .then(shops => {
+            shopOptionsDiv.innerHTML = '';
+            if (!shops.length) {
+                shopOptionsDiv.innerHTML = '<div>該当ブランドのショップがありません</div>';
+                return;
+            }
+            shops.forEach(shop => {
+                const btn = document.createElement('button');
+                btn.className = 'shop-option-btn';
+                btn.textContent = shop.FullName || shop.ShortName;
+                btn.onclick = async () => {
+                    await saveUserShop(shop.ShortName);
+                    shopScreen.style.display = 'none';
+                    // ステータス取得しダッシュボードへ
+                    const status = await fetchUserStatus();
+                    initializeMenu();
+                    showDashboard(status);
+                };
+                shopOptionsDiv.appendChild(btn);
+            });
+        })
+        .catch(() => {
+            shopOptionsDiv.innerHTML = '<div>ショップ取得エラー</div>';
+        });
+}
+
+// ショップ保存API
+async function saveUserShop(shopShortName) {
+    if (!userProfile || !shopShortName) return;
+    await fetch(`${gasUrl}?action=saveShop&userId=${encodeURIComponent(userProfile.userId)}&displayName=${encodeURIComponent(userProfile.displayName)}&pictureUrl=${encodeURIComponent(userProfile.pictureUrl)}&shopShortName=${encodeURIComponent(shopShortName)}`);
+}
+
+// ブランド選択後の処理を修正
+function setupBrandSelectEvents() {
+    document.getElementById('brandLM').onclick = async function() {
+        await saveUserBrand('LM');
+        userBrand = 'LM';
+        showShopSelectScreen('LM');
+    };
+    document.getElementById('brandHA').onclick = async function() {
+        await saveUserBrand('HA');
+        userBrand = 'HA';
+        showShopSelectScreen('HA');
+    };
+}
+
+// 初期化時にブランド選択イベントをセット
+window.addEventListener('DOMContentLoaded', setupBrandSelectEvents);

@@ -42,6 +42,14 @@ function doGet(e) {
     if (params.action === 'getUserStatus') {
       return getUserStatus(params);
     }
+    // ショップリスト取得API（ブランドでフィルタ）
+    if (params.action === 'getShops') {
+      return getShops(params);
+    }
+    // ユーザープロファイルにShop（ShortName）を保存
+    if (params.action === 'saveShop') {
+      return saveShop(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -437,6 +445,72 @@ function saveCompletionLog(params) {
     return ContentService
       .createTextOutput('Spreadsheet Error: ' + error.message)
       .setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ショップリスト取得API（ブランドでフィルタ）
+function getShops(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_SHOP_LIST');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_SHOP_LIST" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    if (values.length < 2) {
+      return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON);
+    }
+    const headers = values[0];
+    const data = values.slice(1).map(row => {
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h] = row[i] !== undefined ? row[i] : '';
+      });
+      return obj;
+    });
+    // ブランドでフィルタ
+    let filtered = data;
+    if (params && params.brand) {
+      filtered = data.filter(shop => shop.Brand === params.brand);
+    }
+    return ContentService.createTextOutput(JSON.stringify(filtered)).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ユーザープロファイルにShop（ShortName）を保存
+function saveShop(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    const shopShortName = params.shopShortName;
+    if (!userId || !shopShortName) {
+      return ContentService.createTextOutput('Error: userId and shopShortName required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][2] === userId) { // userId列
+        sheet.getRange(i+1, 7).setValue(shopShortName); // Shop列（G列=7）
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // 新規の場合は空欄で追加（Shop列は7列目）
+      const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', '', '', shopShortName];
+      sheet.appendRow(row);
+    }
+    return ContentService.createTextOutput('SUCCESS: Shop saved').setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }
 }
 
