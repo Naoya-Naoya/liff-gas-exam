@@ -997,15 +997,19 @@ window.addEventListener('DOMContentLoaded', setupBrandSelectEvents);
 
 // User管理画面の表示処理
 async function showUserManagementScreen() {
+    // すべての画面を非表示
     hideAllScreens();
+    // User管理画面だけ表示
     document.getElementById('userManagementScreen').style.display = 'block';
-    // ダッシュボード非表示
-    document.getElementById('dashboard').style.display = 'none';
     // ユーザー一覧取得
     const userListContainer = document.getElementById('userListContainer');
     userListContainer.innerHTML = '<div class="loading">ユーザー一覧を取得中...</div>';
     try {
-        const res = await fetch(`${gasUrl}?action=getUsersByBrand&brand=${encodeURIComponent(userBrand)}`);
+        const res = await fetch(`${gasUrl}?action=getUsersByBrand&brand=${encodeURIComponent(userBrand)}`, {
+            method: 'GET',
+            mode: 'cors',
+            redirect: 'follow'
+        });
         const users = await res.json();
         if (!Array.isArray(users) || users.length === 0) {
             userListContainer.innerHTML = '<div>ユーザーが見つかりません</div>';
@@ -1035,7 +1039,7 @@ async function showUserManagementScreen() {
             };
         });
     } catch (e) {
-        userListContainer.innerHTML = '<div>ユーザー一覧の取得に失敗しました</div>';
+        userListContainer.innerHTML = '<div>ユーザー一覧の取得に失敗しました<br>' + e + '</div>';
     }
 }
 
@@ -1063,9 +1067,7 @@ async function showUserEditOverlay(user) {
     } catch {
         shopSelect.innerHTML = '<option value="">取得失敗</option>';
     }
-    // Auth選択肢
     document.getElementById('editUserAuth').value = user.auth || 'User';
-    // 保存・キャンセルイベント
     document.getElementById('userEditCancelBtn').onclick = () => {
         overlay.style.display = 'none';
     };
@@ -1077,10 +1079,13 @@ async function showUserEditOverlay(user) {
         e.preventDefault();
         const newShop = document.getElementById('editUserShop').value;
         const newAuth = document.getElementById('editUserAuth').value;
-        // Brandは自分のブランドのみ
         const newBrand = user.brand;
         try {
-            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
+            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`, {
+                method: 'GET',
+                mode: 'cors',
+                redirect: 'follow'
+            });
             const text = await res.text();
             if (!text.includes('SUCCESS')) {
                 alert('保存に失敗しました: ' + text);
