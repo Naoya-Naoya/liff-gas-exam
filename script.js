@@ -1041,7 +1041,6 @@ async function showUserManagementScreen() {
 
 // ユーザー編集オーバーレイの表示
 async function showUserEditOverlay(user) {
-    // オーバーレイ表示
     const overlay = document.getElementById('userEditOverlay');
     overlay.style.display = 'flex';
     document.getElementById('editUserAvatar').src = user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U';
@@ -1070,15 +1069,27 @@ async function showUserEditOverlay(user) {
     document.getElementById('userEditCancelBtn').onclick = () => {
         overlay.style.display = 'none';
     };
-    document.getElementById('userEditForm').onsubmit = async function(e) {
+    // submitイベントの重複バインド防止
+    const form = document.getElementById('userEditForm');
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        const newShop = shopSelect.value;
+        const newShop = document.getElementById('editUserShop').value;
         const newAuth = document.getElementById('editUserAuth').value;
         // Brandは自分のブランドのみ
         const newBrand = user.brand;
-        // 保存API呼び出し
-        await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
-        overlay.style.display = 'none';
-        showUserManagementScreen();
-    };
+        try {
+            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
+            const text = await res.text();
+            if (!text.includes('SUCCESS')) {
+                alert('保存に失敗しました: ' + text);
+                return;
+            }
+            overlay.style.display = 'none';
+            showUserManagementScreen();
+        } catch (err) {
+            alert('保存エラー: ' + err.message);
+        }
+    });
 }
