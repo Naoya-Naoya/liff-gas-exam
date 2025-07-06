@@ -558,12 +558,10 @@ body {
   max-width: 600px;
   min-width: 260px;
   min-height: 220px;
-  max-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  overflow: auto;
 }
 
 #dashboard h2 {
@@ -650,8 +648,6 @@ body {
   padding: 0;
   margin: 0 0 8px 0;
   width: 100%;
-  max-height: 80px;
-  overflow-y: auto;
 }
 #recentClears li {
   font-size: 0.98rem;
