@@ -29,20 +29,6 @@ function updateHeaderUserInfo(name, avatarUrl) {
             avatarElement.src = 'https://placehold.co/100x100/4CAF50/FFFFFF?text=U';
         };
     }
-    // ログアウトボタン設置（なければ追加）
-    if (!document.getElementById('logoutBtn')) {
-        const logoutBtn = document.createElement('button');
-        logoutBtn.id = 'logoutBtn';
-        logoutBtn.textContent = 'ล็อกเอาต์';
-        logoutBtn.style.marginLeft = '10px';
-        logoutBtn.onclick = function() {
-            if (window.liff) {
-                liff.logout();
-            }
-            location.reload();
-        };
-        avatarElement.parentNode.appendChild(logoutBtn);
-    }
 }
 
 // 画面切り替え
@@ -738,3 +724,164 @@ function showDashboardFromCompletion() {
         showError('ダッシュボード表示エラー: ' + (e && e.message ? e.message : e));
     });
 }
+
+// バーガーメニュー機能
+function initializeMenu() {
+    const burgerMenuBtn = document.getElementById('burgerMenuBtn');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    // バーガーメニューボタンのクリックイベント
+    if (burgerMenuBtn) {
+        burgerMenuBtn.addEventListener('click', () => {
+            openMenu();
+        });
+    }
+
+    // 閉じるボタンのクリックイベント
+    if (closeMenuBtn) {
+        closeMenuBtn.addEventListener('click', () => {
+            closeMenu();
+        });
+    }
+
+    // オーバーレイのクリックイベント
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', () => {
+            closeMenu();
+        });
+    }
+
+    // メニューアイテムのクリックイベント
+    menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = item.getAttribute('data-action');
+            handleMenuAction(action);
+            closeMenu();
+        });
+    });
+
+    // ESCキーでメニューを閉じる
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+// メニューを開く
+function openMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (sideMenu) {
+        sideMenu.classList.add('open');
+    }
+    
+    if (menuOverlay) {
+        menuOverlay.classList.add('show');
+    }
+    
+    // スクロールを無効化
+    document.body.style.overflow = 'hidden';
+}
+
+// メニューを閉じる
+function closeMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (sideMenu) {
+        sideMenu.classList.remove('open');
+    }
+    
+    if (menuOverlay) {
+        menuOverlay.classList.remove('show');
+    }
+    
+    // スクロールを有効化
+    document.body.style.overflow = '';
+}
+
+// メニューアクションの処理
+function handleMenuAction(action) {
+    console.log('メニューアクション:', action);
+    
+    switch (action) {
+        case 'dashboard':
+            // ダッシュボードに戻る
+            if (currentScreen !== 'dashboard') {
+                fetchUserStatus().then(status => {
+                    showDashboard(status);
+                }).catch(error => {
+                    console.error('ダッシュボード表示エラー:', error);
+                    showError('ダッシュボードの表示に失敗しました');
+                });
+            }
+            break;
+            
+        case 'total-status':
+            // Total Status画面を表示（実装予定）
+            alert('Total Status機能は準備中です');
+            break;
+            
+        case 'user-management':
+            // User管理画面を表示（実装予定）
+            alert('User管理機能は準備中です');
+            break;
+            
+        case 'settings':
+            // 設定画面を表示（実装予定）
+            alert('設定機能は準備中です');
+            break;
+            
+        case 'help':
+            // ヘルプ画面を表示（実装予定）
+            alert('ヘルプ機能は準備中です');
+            break;
+            
+        case 'about':
+            // アプリについて画面を表示（実装予定）
+            alert('アプリについて機能は準備中です');
+            break;
+            
+        case 'notifications':
+            // 通知設定画面を表示（実装予定）
+            alert('通知設定機能は準備中です');
+            break;
+            
+        case 'privacy':
+            // プライバシー画面を表示（実装予定）
+            alert('プライバシー機能は準備中です');
+            break;
+            
+        case 'terms':
+            // 利用規約画面を表示（実装予定）
+            alert('利用規約機能は準備中です');
+            break;
+            
+        case 'logout':
+            // ログアウト処理
+            if (window.liff) {
+                liff.logout();
+            }
+            location.reload();
+            break;
+            
+        default:
+            console.log('未実装のメニューアクション:', action);
+            break;
+    }
+}
+
+// ページ読み込み時の初期化
+document.addEventListener('DOMContentLoaded', function() {
+    // 既存の初期化処理
+    initializeLiff();
+    
+    // メニュー機能の初期化
+    initializeMenu();
+});
