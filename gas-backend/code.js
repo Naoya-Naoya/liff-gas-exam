@@ -50,6 +50,14 @@ function doGet(e) {
     if (params.action === 'saveShop') {
       return saveShop(params);
     }
+    // ★ 管理者用ユーザー一覧取得API
+    if (params.action === 'getUsersByBrand') {
+      return getUsersByBrand(params);
+    }
+    // ★ ユーザー権限保存API
+    if (params.action === 'saveAuth') {
+      return saveAuth(params);
+    }
     
     // テスト用レスポンス
     return ContentService
@@ -511,6 +519,71 @@ function saveShop(params) {
       sheet.appendRow(row);
     }
     return ContentService.createTextOutput('SUCCESS: Shop saved').setMimeType(ContentService.MimeType.TEXT);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// 管理者用：ブランドごとのユーザー一覧取得
+function getUsersByBrand(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON);
+    }
+    const brand = params.brand;
+    if (!brand) {
+      return ContentService.createTextOutput(JSON.stringify({ error: 'brand required' })).setMimeType(ContentService.MimeType.JSON);
+    }
+    const values = sheet.getDataRange().getValues();
+    const headers = values[0];
+    const users = values.slice(1)
+      .filter(row => row[4] === brand)
+      .map(row => ({
+        userId: row[2] || '',
+        displayName: row[1] || '',
+        pictureUrl: row[3] || '',
+        brand: row[4] || '',
+        auth: row[5] || '',
+        shop: row[6] || ''
+      }));
+    return ContentService.createTextOutput(JSON.stringify(users)).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// ユーザー権限保存API
+function saveAuth(params) {
+  try {
+    const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName('LIFF_User_Profiles');
+    if (!sheet) {
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const userId = params.userId;
+    const auth = params.auth;
+    if (!userId || !auth) {
+      return ContentService.createTextOutput('Error: userId and auth required').setMimeType(ContentService.MimeType.TEXT);
+    }
+    const values = sheet.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][2] === userId) { // userId列
+        sheet.getRange(i+1, 6).setValue(auth); // auth列（F列=6）
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // 新規の場合は空欄で追加（auth列は6列目）
+      const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', '', auth, ''];
+      sheet.appendRow(row);
+    }
+    return ContentService.createTextOutput('SUCCESS: Auth saved').setMimeType(ContentService.MimeType.TEXT);
   } catch (error) {
     return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }

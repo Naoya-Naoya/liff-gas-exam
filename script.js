@@ -750,9 +750,9 @@ function renderSideMenu() {
     // ユーザー共通メニュー
     html += '<li><a href="#" class="menu-item" data-action="dashboard">ダッシュボード</a></li>';
     html += '<li><a href="#" class="menu-item" data-action="total-status">Total Status</a></li>';
-    html += '<li><a href="#" class="menu-item" data-action="user-management">User管理</a></li>';
-    // 管理者専用メニュー
+    // User管理・管理者専用メニューはAdminのみ
     if (userAuthType === 'Admin') {
+        html += '<li><a href="#" class="menu-item" data-action="user-management">User管理</a></li>';
         html += '<li><a href="#" class="menu-item" data-action="settings">設定</a></li>';
         html += '<li><a href="#" class="menu-item" data-action="help">ヘルプ</a></li>';
         html += '<li><a href="#" class="menu-item" data-action="about">アプリについて</a></li>';
@@ -882,8 +882,8 @@ function handleMenuAction(action) {
             break;
             
         case 'user-management':
-            // User管理画面を表示（実装予定）
-            alert('User管理機能は準備中です');
+            // User管理画面を表示
+            showUserManagementScreen();
             break;
             
         case 'settings':
@@ -994,3 +994,65 @@ function setupBrandSelectEvents() {
 
 // 初期化時にブランド選択イベントをセット
 window.addEventListener('DOMContentLoaded', setupBrandSelectEvents);
+
+// User管理画面の表示処理
+async function showUserManagementScreen() {
+    hideAllScreens();
+    document.getElementById('userManagementScreen').style.display = 'block';
+    // ユーザー一覧取得
+    const userListContainer = document.getElementById('userListContainer');
+    userListContainer.innerHTML = '<div class="loading">ユーザー一覧を取得中...</div>';
+    try {
+        const res = await fetch(`${gasUrl}?action=getUsersByBrand&brand=${encodeURIComponent(userBrand)}`);
+        const users = await res.json();
+        if (!Array.isArray(users) || users.length === 0) {
+            userListContainer.innerHTML = '<div>ユーザーが見つかりません</div>';
+            return;
+        }
+        let html = '<table style="margin:0 auto; border-collapse:separate; border-spacing:0 8px; width:90%; max-width:600px;">';
+        html += '<tr><th>アバター</th><th>名前</th><th>Brand</th><th>Shop</th><th>Auth</th><th>操作</th></tr>';
+        users.forEach(user => {
+            html += `<tr>` +
+                `<td><img src="${user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U'}" alt="avatar" style="width:48px;height:48px;border-radius:50%;object-fit:cover;"></td>` +
+                `<td>${user.displayName || ''}</td>` +
+                `<td>${user.brand || ''}</td>` +
+                `<td>${user.shop || ''}</td>` +
+                `<td>${user.auth || ''}</td>` +
+                `<td><button class="edit-user-btn" data-userid="${user.userId}">編集</button></td>` +
+                `</tr>`;
+        });
+        html += '</table>';
+        userListContainer.innerHTML = html;
+        // 編集ボタンのイベント
+        document.querySelectorAll('.edit-user-btn').forEach(btn => {
+            btn.onclick = function() {
+                const userId = btn.getAttribute('data-userid');
+                const user = users.find(u => u.userId === userId);
+                if (!user) return;
+                showUserEditDialog(user);
+            };
+        });
+    } catch (e) {
+        userListContainer.innerHTML = '<div>ユーザー一覧の取得に失敗しました</div>';
+    }
+}
+
+// ユーザー編集ダイアログの表示
+function showUserEditDialog(user) {
+    // シンプルなダイアログUI（window.promptで代用）
+    // Brandは自分のブランドのみ、ShopとAuthは直接入力/選択
+    const newShop = window.prompt('Shopを入力してください', user.shop || '');
+    if (newShop === null) return; // キャンセル
+    const newAuth = window.prompt('Authを入力してください（Admin/User）', user.auth || 'User');
+    if (newAuth === null) return;
+    // 保存処理
+    Promise.all([
+        fetch(`${gasUrl}?action=saveShop&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&shopShortName=${encodeURIComponent(newShop)}`),
+        fetch(`${gasUrl}?action=saveAuth&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&auth=${encodeURIComponent(newAuth)}`)
+    ]).then(() => {
+        alert('保存しました');
+        showUserManagementScreen(); // 再描画
+    }).catch(() => {
+        alert('保存に失敗しました');
+    });
+}
