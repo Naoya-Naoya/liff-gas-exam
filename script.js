@@ -39,6 +39,16 @@ function showScreen(screenName) {
     document.getElementById('completionScreen').style.display = 'none';
     document.getElementById('brandSelectScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
+
+    // プログレスバーの表示制御
+    const progressSection = document.getElementById('progressSection');
+    if (screenName === 'quiz' || screenName === 'completion') {
+        progressSection.style.display = '';
+    } else {
+        progressSection.style.display = 'none';
+    }
+
+    // 画面ごとの表示
     if (screenName === 'loading') {
         document.getElementById('loadingScreen').style.display = 'block';
     } else if (screenName === 'error') {
