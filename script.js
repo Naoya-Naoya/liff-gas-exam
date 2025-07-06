@@ -374,25 +374,25 @@ async function initializeLiff() {
         sendUserActionLog('login');
         console.log('[DEBUG] sendUserActionLog(login)呼び出し');
         
-        // ブランド取得
-        console.log('[DEBUG] fetchUserBrand呼び出し');
-        userBrand = await fetchUserBrand();
-        console.log('[DEBUG] fetchUserBrand完了', userBrand);
+        // ブランド・ショップ取得
+        console.log('[DEBUG] fetchUserStatus呼び出し');
+        const status = await fetchUserStatus();
+        console.log('[DEBUG] fetchUserStatus完了', status);
+        userBrand = status.brand;
+        const userShop = status.shop;
         isBrandChecked = true;
         if (!userBrand) {
             console.log('[DEBUG] ブランド未登録、ブランド選択画面へ');
             showBrandSelectScreenForFirst();
             return;
         }
-        // ステータス取得
-        console.log('[DEBUG] fetchUserStatus呼び出し');
-        const status = await fetchUserStatus();
-        console.log('[DEBUG] fetchUserStatus完了', status);
-        console.log('[DEBUG] ブランド登録済み、ダッシュボードへ', status);
-
+        if (!userShop) {
+            console.log('[DEBUG] ショップ未登録、ショップ選択画面へ');
+            showShopSelectScreen(userBrand);
+            return;
+        }
         // ★ここでサイドメニュー初期化
         initializeMenu();
-
         showDashboard(status);
         
     } catch (e) {
