@@ -786,6 +786,7 @@ function initializeMenu() {
 function openMenu() {
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
+    const burgerMenuBtn = document.getElementById('burgerMenuBtn');
     
     if (sideMenu) {
         sideMenu.classList.add('open');
@@ -795,6 +796,10 @@ function openMenu() {
         menuOverlay.classList.add('show');
     }
     
+    // バーガーアイコンを非表示
+    if (burgerMenuBtn) {
+        burgerMenuBtn.style.display = 'none';
+    }
     // スクロールを無効化
     document.body.style.overflow = 'hidden';
 }
@@ -803,6 +808,7 @@ function openMenu() {
 function closeMenu() {
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
+    const burgerMenuBtn = document.getElementById('burgerMenuBtn');
     
     if (sideMenu) {
         sideMenu.classList.remove('open');
@@ -812,6 +818,10 @@ function closeMenu() {
         menuOverlay.classList.remove('show');
     }
     
+    // バーガーアイコンを再表示
+    if (burgerMenuBtn) {
+        burgerMenuBtn.style.display = '';
+    }
     // スクロールを有効化
     document.body.style.overflow = '';
 }
