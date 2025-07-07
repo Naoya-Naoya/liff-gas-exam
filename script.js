@@ -729,6 +729,7 @@ function hideAllScreens() {
     document.getElementById('completionScreen').style.display = 'none';
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('errorScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'none';
 }
 
 // completion画面からダッシュボードに戻る
