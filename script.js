@@ -98,7 +98,8 @@ async function sendUserActionLog(actionType, extra = {}) {
 // ダッシュボード画面の表示
 function showDashboard(status) {
     try {
-        showScreen('dashboard');
+        hideAllScreens();
+        document.getElementById('dashboard').style.display = 'block';
         console.log('[DEBUG] showDashboard開始', status);
         // 画面表示状態を確認
         console.log('[DEBUG] loadingScreen display:', document.getElementById('loadingScreen').style.display);
