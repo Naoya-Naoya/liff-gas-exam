@@ -1047,6 +1047,8 @@ async function showUserManagementScreen() {
 
 // ユーザー編集オーバーレイの表示
 async function showUserEditOverlay(user) {
+    console.log('編集画面 user.shop:', user.shop);
+    console.log('編集画面 user.auth:', user.auth);
     const overlay = document.getElementById('userEditOverlay');
     overlay.style.display = 'flex';
     document.getElementById('editUserAvatar').src = user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U';
@@ -1060,6 +1062,7 @@ async function showUserEditOverlay(user) {
         const shops = await res.json();
         shopSelect.innerHTML = '';
         shops.forEach(shop => {
+            console.log('shop.ShortName:', shop.ShortName, 'user.shop:', user.shop);
             const opt = document.createElement('option');
             opt.value = shop.ShortName;
             opt.textContent = shop.FullName || shop.ShortName;
@@ -1070,6 +1073,7 @@ async function showUserEditOverlay(user) {
         shopSelect.innerHTML = '<option value="">取得失敗</option>';
     }
     document.getElementById('editUserAuth').value = user.auth || 'User';
+    console.log('セット後 editUserAuth.value:', document.getElementById('editUserAuth').value);
     // submitイベントの重複バインド防止
     const form = document.getElementById('userEditForm');
     const newForm = form.cloneNode(true);
