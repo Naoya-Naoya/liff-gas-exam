@@ -108,9 +108,6 @@ function showDashboard(status) {
         console.log('[DEBUG] quizScreen display:', document.getElementById('quizScreen').style.display);
         console.log('[DEBUG] completionScreen display:', document.getElementById('completionScreen').style.display);
         console.log('[DEBUG] brandSelectScreen display:', document.getElementById('brandSelectScreen').style.display);
-        // 画面非表示
-        hideAllScreens();
-        console.log('[DEBUG] hideAllScreens実行');
         // todayStatus
         const todayStatusElem = document.getElementById('todayStatus');
         if (todayStatusElem) {
