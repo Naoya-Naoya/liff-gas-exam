@@ -1047,10 +1047,14 @@ async function showUserManagementScreen() {
 
 // ユーザー編集オーバーレイの表示
 async function showUserEditOverlay(user) {
-    console.log('編集画面 user.shop:', user.shop);
-    console.log('編集画面 user.auth:', user.auth);
     const overlay = document.getElementById('userEditOverlay');
     overlay.style.display = 'flex';
+    // ローディング表示
+    const loadingDiv = document.getElementById('userEditLoading');
+    loadingDiv.style.display = 'block';
+    // フォーム本体を一時的に非表示
+    Array.from(document.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = 'none');
+    // ...既存の初期セット...
     document.getElementById('editUserAvatar').src = user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U';
     document.getElementById('editUserName').textContent = user.displayName || '';
     document.getElementById('editUserBrand').value = user.brand || '';
@@ -1062,7 +1066,6 @@ async function showUserEditOverlay(user) {
         const shops = await res.json();
         shopSelect.innerHTML = '';
         shops.forEach(shop => {
-            console.log('shop.ShortName:', shop.ShortName, 'user.shop:', user.shop);
             const opt = document.createElement('option');
             opt.value = shop.ShortName;
             opt.textContent = shop.FullName || shop.ShortName;
@@ -1072,19 +1075,20 @@ async function showUserEditOverlay(user) {
     } catch {
         shopSelect.innerHTML = '<option value="">取得失敗</option>';
     }
+    // Auth
     document.getElementById('editUserAuth').value = user.auth || 'User';
-    console.log('セット後 editUserAuth.value:', document.getElementById('editUserAuth').value);
     // submitイベントの重複バインド防止
     const form = document.getElementById('userEditForm');
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
-    // cloneNode後に再度値をセット
     newForm.querySelector('#editUserShop').value = user.shop || '';
     newForm.querySelector('#editUserAuth').value = user.auth || 'User';
-    // キャンセルボタンのイベントを再バインド
     newForm.querySelector('#userEditCancelBtn').onclick = () => {
         overlay.style.display = 'none';
     };
+    // データ取得完了後にローディング非表示・フォーム本体表示
+    loadingDiv.style.display = 'none';
+    Array.from(document.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = '' );
     newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const newShop = document.getElementById('editUserShop').value;
