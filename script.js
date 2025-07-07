@@ -100,6 +100,7 @@ function showDashboard(status) {
     try {
         hideAllScreens();
         document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('userManagementScreen').style.display = 'none';
         console.log('[DEBUG] showDashboard開始', status);
         // 画面表示状態を確認
         console.log('[DEBUG] loadingScreen display:', document.getElementById('loadingScreen').style.display);
