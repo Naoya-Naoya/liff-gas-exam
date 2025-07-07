@@ -1070,13 +1070,14 @@ async function showUserEditOverlay(user) {
         shopSelect.innerHTML = '<option value="">取得失敗</option>';
     }
     document.getElementById('editUserAuth').value = user.auth || 'User';
-    document.getElementById('userEditCancelBtn').onclick = () => {
-        overlay.style.display = 'none';
-    };
     // submitイベントの重複バインド防止
     const form = document.getElementById('userEditForm');
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
+    // キャンセルボタンのイベントを再バインド
+    newForm.querySelector('#userEditCancelBtn').onclick = () => {
+        overlay.style.display = 'none';
+    };
     newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const newShop = document.getElementById('editUserShop').value;
