@@ -734,6 +734,7 @@ function hideAllScreens() {
 // completion画面からダッシュボードに戻る
 function showDashboardFromCompletion() {
     hideAllScreens();
+    document.getElementById('loadingScreen').style.display = 'block';
     // ユーザーステータスを再取得してダッシュボードを表示
     fetchUserStatus().then(status => {
         showDashboard(status);
@@ -867,6 +868,8 @@ function handleMenuAction(action) {
         case 'dashboard':
             // ダッシュボードに戻る
             if (currentScreen !== 'dashboard') {
+                hideAllScreens();
+                document.getElementById('loadingScreen').style.display = 'block';
                 fetchUserStatus().then(status => {
                     showDashboard(status);
                 }).catch(error => {
