@@ -1078,6 +1078,9 @@ async function showUserEditOverlay(user) {
     const form = document.getElementById('userEditForm');
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
+    // cloneNode後に再度値をセット
+    newForm.querySelector('#editUserShop').value = user.shop || '';
+    newForm.querySelector('#editUserAuth').value = user.auth || 'User';
     // キャンセルボタンのイベントを再バインド
     newForm.querySelector('#userEditCancelBtn').onclick = () => {
         overlay.style.display = 'none';
