@@ -1057,7 +1057,7 @@ async function showUserEditOverlay(user) {
     // ...既存の初期セット...
     document.getElementById('editUserAvatar').src = user.pictureUrl || 'https://placehold.co/60x60/4CAF50/FFFFFF?text=U';
     document.getElementById('editUserName').textContent = user.displayName || '';
-    document.getElementById('editUserBrand').value = user.brand || '';
+    document.getElementById('editUserBrand').textContent = user.brand || '';
     // Shop選択肢を取得
     const shopSelect = document.getElementById('editUserShop');
     shopSelect.innerHTML = '<option value="">取得中...</option>';
@@ -1088,7 +1088,7 @@ async function showUserEditOverlay(user) {
     };
     // データ取得完了後にローディング非表示・フォーム本体表示
     loadingDiv.style.display = 'none';
-    Array.from(document.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = '' );
+    Array.from(newForm.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = '' );
     newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const newShop = document.getElementById('editUserShop').value;
