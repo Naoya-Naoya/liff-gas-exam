@@ -1087,7 +1087,10 @@ async function showUserEditOverlay(user) {
         overlay.style.display = 'none';
     };
     // データ取得完了後にローディング非表示・フォーム本体表示
+    // 旧フォームとnewForm両方のローディングを非表示にする
     loadingDiv.style.display = 'none';
+    const newLoadingDiv = newForm.querySelector('#userEditLoading');
+    if (newLoadingDiv) newLoadingDiv.style.display = 'none';
     Array.from(newForm.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = '' );
     newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
