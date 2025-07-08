@@ -1098,7 +1098,7 @@ async function showUserEditOverlay(user) {
         const newAuth = document.getElementById('editUserAuth').value;
         const newBrand = user.brand;
         try {
-            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
+            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shopShortName=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
             const text = await res.text();
             if (!text.includes('SUCCESS')) {
                 alert('保存に失敗しました: ' + text);
