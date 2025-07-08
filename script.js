@@ -1069,34 +1069,38 @@ async function showUserEditOverlay(user) {
             const opt = document.createElement('option');
             opt.value = shop.ShortName;
             opt.textContent = shop.FullName || shop.ShortName;
-            if (shop.ShortName === user.shop) opt.selected = true;
             shopSelect.appendChild(opt);
         });
+        // 初期値セット
+        shopSelect.value = user.shop || '';
     } catch {
         shopSelect.innerHTML = '<option value="">取得失敗</option>';
     }
     // Auth
-    document.getElementById('editUserAuth').value = user.auth || 'User';
+    const authSelect = document.getElementById('editUserAuth');
+    authSelect.value = user.auth || 'User';
     // submitイベントの重複バインド防止
     const form = document.getElementById('userEditForm');
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
-    newForm.querySelector('#editUserShop').value = user.shop || '';
-    newForm.querySelector('#editUserAuth').value = user.auth || 'User';
+    // キャンセルボタン
     newForm.querySelector('#userEditCancelBtn').onclick = () => {
         overlay.style.display = 'none';
     };
     // データ取得完了後にローディング非表示・フォーム本体表示
-    // 旧フォームとnewForm両方のローディングを非表示にする
     loadingDiv.style.display = 'none';
     const newLoadingDiv = newForm.querySelector('#userEditLoading');
     if (newLoadingDiv) newLoadingDiv.style.display = 'none';
     Array.from(newForm.querySelectorAll('.user-edit-avatar-name, .user-edit-row, .user-edit-actions')).forEach(el => el.style.display = '' );
+    // 保存処理
     newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        const newShop = document.getElementById('editUserShop').value;
-        const newAuth = document.getElementById('editUserAuth').value;
-        const newBrand = user.brand;
+        // 入力値取得（空なら元の値を使う）
+        const shopValue = document.getElementById('editUserShop').value;
+        const authValue = document.getElementById('editUserAuth').value;
+        const newShop = shopValue !== '' ? shopValue : user.shop;
+        const newAuth = authValue !== '' ? authValue : user.auth;
+        const newBrand = user.brand; // ブランドは編集不可
         try {
             const updateUrl = `${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shopShortName=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`;
             console.log('[DEBUG] updateUserProfile fetch URL:', updateUrl);
