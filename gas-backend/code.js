@@ -596,6 +596,7 @@ function saveAuth(params) {
 // ユーザープロファイル一括更新API
 function updateUserProfile(params) {
   try {
+    Logger.log('updateUserProfile params: ' + JSON.stringify(params));
     const SPREADSHEET_ID = '1WyBHLNfQV424ejAJd8Y2mVTJUdqz_5JNF06zlK4dqGM';
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
@@ -624,6 +625,7 @@ function updateUserProfile(params) {
     }
     return ContentService.createTextOutput('SUCCESS: User profile updated').setMimeType(ContentService.MimeType.TEXT);
   } catch (error) {
+    Logger.log('updateUserProfile error: ' + error.message);
     return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
   }
 }

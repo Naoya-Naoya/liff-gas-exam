@@ -1098,7 +1098,9 @@ async function showUserEditOverlay(user) {
         const newAuth = document.getElementById('editUserAuth').value;
         const newBrand = user.brand;
         try {
-            const res = await fetch(`${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shopShortName=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`);
+            const updateUrl = `${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`;
+            console.log('[DEBUG] updateUserProfile fetch URL:', updateUrl);
+            const res = await fetch(updateUrl);
             const text = await res.text();
             if (!text.includes('SUCCESS')) {
                 alert('保存に失敗しました: ' + text);
@@ -1107,7 +1109,8 @@ async function showUserEditOverlay(user) {
             overlay.style.display = 'none';
             showUserManagementScreen();
         } catch (err) {
-            alert('保存エラー: ' + err.message);
+            console.error('[DEBUG] updateUserProfile fetch error:', err);
+            alert('保存エラー: ' + (err && err.message ? err.message : err));
         }
     });
 }
