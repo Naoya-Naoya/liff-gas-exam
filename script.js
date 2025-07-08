@@ -1098,7 +1098,7 @@ async function showUserEditOverlay(user) {
         const newAuth = document.getElementById('editUserAuth').value;
         const newBrand = user.brand;
         try {
-            const updateUrl = `${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shop=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`;
+            const updateUrl = `${gasUrl}?action=updateUserProfile&userId=${encodeURIComponent(user.userId)}&displayName=${encodeURIComponent(user.displayName)}&pictureUrl=${encodeURIComponent(user.pictureUrl)}&brand=${encodeURIComponent(newBrand)}&shopShortName=${encodeURIComponent(newShop)}&auth=${encodeURIComponent(newAuth)}`;
             console.log('[DEBUG] updateUserProfile fetch URL:', updateUrl);
             const res = await fetch(updateUrl);
             const text = await res.text();
