@@ -11,67 +11,69 @@ function doGet(e) {
         displayName: params.displayName || 'Unknown',
         userId: params.userId || 'Unknown', 
         pictureUrl: params.pictureUrl || ''
-      });
+      }).setHeader('Access-Control-Allow-Origin', '*');
     }
     
     // ★ クイズ問題取得API
     if (params.action === 'getQuestions') {
-      return getQuestionsJson();
+      return getQuestionsJson().setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ユーザー回答ログ保存API
     if (params.action === 'saveAnswer') {
-      return saveAnswerLog(params);
+      return saveAnswerLog(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ クイズ完了ログ保存API
     if (params.action === 'saveCompletion') {
-      return saveCompletionLog(params);
+      return saveCompletionLog(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ユーザーアクションログ保存API
     if (params.action === 'saveActionLog') {
-      return saveActionLog(params);
+      return saveActionLog(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ブランド保存API
     if (params.action === 'saveBrand') {
-      return saveBrand(params);
+      return saveBrand(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ブランド取得API
     if (params.action === 'getBrand') {
-      return getBrand(params);
+      return getBrand(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ユーザーステータス取得API
     if (params.action === 'getUserStatus') {
-      return getUserStatus(params);
+      return getUserStatus(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ショップリスト取得API（ブランドでフィルタ）
     if (params.action === 'getShops') {
-      return getShops(params);
+      return getShops(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ユーザープロファイルにShop（ShortName）を保存
     if (params.action === 'saveShop') {
-      return saveShop(params);
+      return saveShop(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ 管理者用ユーザー一覧取得API
     if (params.action === 'getUsersByBrand') {
-      return getUsersByBrand(params);
+      return getUsersByBrand(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ユーザー権限保存API
     if (params.action === 'saveAuth') {
-      return saveAuth(params);
+      return saveAuth(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     // ★ ユーザープロファイル一括更新API
     if (params.action === 'updateUserProfile') {
-      return updateUserProfile(params);
+      return updateUserProfile(params).setHeader('Access-Control-Allow-Origin', '*');
     }
     
     // テスト用レスポンス
     return ContentService
       .createTextOutput('GAS Web App is working! GET method successful.')
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
       
   } catch (error) {
     return ContentService
       .createTextOutput('GET Error: ' + error.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -90,17 +92,19 @@ function doPost(e) {
     }
     
     if (data.type === 'profileData') {
-      return handleProfileData(data);
+      return handleProfileData(data).setHeader('Access-Control-Allow-Origin', '*');
     }
     
     return ContentService
       .createTextOutput('POST Success: Data received - ' + JSON.stringify(data))
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
       
   } catch (error) {
     return ContentService
       .createTextOutput('POST Error: ' + error.message + ' | Raw data: ' + (e.postData ? e.postData.contents : 'No data'))
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -113,7 +117,8 @@ function handleProfileData(data) {
     if (!sheet) {
       return ContentService
         .createTextOutput('Error: Sheet "LIFF_User_Profiles" not found')
-        .setMimeType(ContentService.MimeType.TEXT);
+        .setMimeType(ContentService.MimeType.TEXT)
+        .setHeader('Access-Control-Allow-Origin', '*');
     }
     
     // 既にuserIdが存在するかチェック
@@ -137,12 +142,14 @@ function handleProfileData(data) {
     }
     return ContentService
       .createTextOutput('SUCCESS: Profile data checked/added. User: ' + data.displayName)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
       
   } catch (error) {
     return ContentService
       .createTextOutput('Spreadsheet Error: ' + error.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -176,11 +183,11 @@ function getQuestionsJson() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('LIFF_Questions');
   if (!sheet) {
-    return ContentService.createTextOutput('Error: Sheet "LIFF_Questions" not found').setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Error: Sheet "LIFF_Questions" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
   const values = sheet.getDataRange().getValues();
   if (values.length < 2) {
-    return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   }
   const headers = values[0];
   const data = values.slice(1).map(row => {
@@ -190,7 +197,7 @@ function getQuestionsJson() {
     });
     return obj;
   });
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
 }
 
 // ユーザー回答ログをスプレッドシートに保存
@@ -202,7 +209,8 @@ function saveAnswerLog(params) {
     if (!sheet) {
       return ContentService
         .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
-        .setMimeType(ContentService.MimeType.TEXT);
+        .setMimeType(ContentService.MimeType.TEXT)
+        .setHeader('Access-Control-Allow-Origin', '*');
     }
     const timestamp = params.timestamp || new Date().toISOString();
     sheet.appendRow([
@@ -216,11 +224,13 @@ function saveAnswerLog(params) {
     ]);
     return ContentService
       .createTextOutput('SUCCESS: Answer log saved.')
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
     return ContentService
       .createTextOutput('Spreadsheet Error: ' + error.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -233,7 +243,8 @@ function saveActionLog(params) {
     if (!sheet) {
       return ContentService
         .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
-        .setMimeType(ContentService.MimeType.TEXT);
+        .setMimeType(ContentService.MimeType.TEXT)
+        .setHeader('Access-Control-Allow-Origin', '*');
     }
     // 主要なパラメータを全て記録
     sheet.appendRow([
@@ -255,11 +266,13 @@ function saveActionLog(params) {
     ]);
     return ContentService
       .createTextOutput('SUCCESS: Action log saved.')
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
     return ContentService
       .createTextOutput('Spreadsheet Error: ' + error.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -270,12 +283,12 @@ function saveBrand(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     const brand = params.brand;
     if (!userId || !brand) {
-      return ContentService.createTextOutput('Error: userId and brand required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: userId and brand required').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     let found = false;
@@ -289,9 +302,9 @@ function saveBrand(params) {
     if (!found) {
       sheet.appendRow([new Date(), params.displayName || '', userId, params.pictureUrl || '', brand]);
     }
-    return ContentService.createTextOutput('SUCCESS: Brand saved').setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('SUCCESS: Brand saved').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -302,21 +315,21 @@ function getBrand(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     if (!userId) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     for (let i = 1; i < values.length; i++) {
       if (values[i][2] === userId) {
-        return ContentService.createTextOutput(JSON.stringify({ brand: values[i][4] || '' })).setMimeType(ContentService.MimeType.JSON);
+        return ContentService.createTextOutput(JSON.stringify({ brand: values[i][4] || '' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
       }
     }
-    return ContentService.createTextOutput(JSON.stringify({ brand: '' })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ brand: '' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -328,11 +341,11 @@ function getUserStatus(params) {
     const clearsSheet = ss.getSheetByName('LIFF_User_Clears');
     const profilesSheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!clearsSheet || !profilesSheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet not found' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet not found' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     if (!userId) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'userId required' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const now = new Date();
     const todayStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyy-MM-dd');
@@ -409,9 +422,9 @@ function getUserStatus(params) {
         break;
       }
     }
-    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand, auth, shop, clearsByDay })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ todayCount, monthStatus, recent, brand, auth, shop, clearsByDay })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -424,7 +437,8 @@ function saveCompletionLog(params) {
     if (!sheet) {
       return ContentService
         .createTextOutput('Error: Sheet "LIFF_User_Actions" not found')
-        .setMimeType(ContentService.MimeType.TEXT);
+        .setMimeType(ContentService.MimeType.TEXT)
+        .setHeader('Access-Control-Allow-Origin', '*');
     }
     const completedAt = params.completedAt || new Date().toISOString();
     sheet.appendRow([
@@ -454,11 +468,13 @@ function saveCompletionLog(params) {
     }
     return ContentService
       .createTextOutput('SUCCESS: Completion log saved.')
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
     return ContentService
       .createTextOutput('Spreadsheet Error: ' + error.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -469,11 +485,11 @@ function getShops(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_SHOP_LIST');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_SHOP_LIST" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: Sheet "LIFF_SHOP_LIST" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     if (values.length < 2) {
-      return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput('[]').setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const headers = values[0];
     const data = values.slice(1).map(row => {
@@ -488,9 +504,9 @@ function getShops(params) {
     if (params && params.brand) {
       filtered = data.filter(shop => shop.Brand === params.brand);
     }
-    return ContentService.createTextOutput(JSON.stringify(filtered)).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify(filtered)).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -501,12 +517,12 @@ function saveShop(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     const shopShortName = params.shopShortName;
     if (!userId || !shopShortName) {
-      return ContentService.createTextOutput('Error: userId and shopShortName required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: userId and shopShortName required').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     let found = false;
@@ -522,9 +538,9 @@ function saveShop(params) {
       const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', '', '', shopShortName];
       sheet.appendRow(row);
     }
-    return ContentService.createTextOutput('SUCCESS: Shop saved').setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('SUCCESS: Shop saved').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -535,11 +551,11 @@ function getUsersByBrand(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'Sheet "LIFF_User_Profiles" not found' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const brand = params.brand;
     if (!brand) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'brand required' })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ error: 'brand required' })).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     const headers = values[0];
@@ -553,9 +569,9 @@ function getUsersByBrand(params) {
         auth: row[5] || '',
         shop: row[6] || ''
       }));
-    return ContentService.createTextOutput(JSON.stringify(users)).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify(users)).setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -566,12 +582,12 @@ function saveAuth(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     const auth = params.auth;
     if (!userId || !auth) {
-      return ContentService.createTextOutput('Error: userId and auth required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: userId and auth required').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     let found = false;
@@ -587,9 +603,9 @@ function saveAuth(params) {
       const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', '', auth, ''];
       sheet.appendRow(row);
     }
-    return ContentService.createTextOutput('SUCCESS: Auth saved').setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('SUCCESS: Auth saved').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
@@ -601,11 +617,11 @@ function updateUserProfile(params) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = ss.getSheetByName('LIFF_User_Profiles');
     if (!sheet) {
-      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: Sheet "LIFF_User_Profiles" not found').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const userId = params.userId;
     if (!userId) {
-      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput('Error: userId required').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
     }
     const values = sheet.getDataRange().getValues();
     let found = false;
@@ -623,10 +639,10 @@ function updateUserProfile(params) {
       const row = [new Date(), params.displayName || '', userId, params.pictureUrl || '', params.brand || '', params.auth || '', params.shop || ''];
       sheet.appendRow(row);
     }
-    return ContentService.createTextOutput('SUCCESS: User profile updated').setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('SUCCESS: User profile updated').setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   } catch (error) {
     Logger.log('updateUserProfile error: ' + error.message);
-    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput('Spreadsheet Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT).setHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
