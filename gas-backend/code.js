@@ -629,7 +629,7 @@ function updateUserProfile(params) {
       if (values[i][2] === userId) { // userId列
         if (params.brand !== undefined) sheet.getRange(i+1, 5).setValue(params.brand);
         if (params.auth !== undefined) sheet.getRange(i+1, 6).setValue(params.auth);
-        if (params.shop !== undefined) sheet.getRange(i+1, 7).setValue(params.shop);
+        if (params.shopShortName !== undefined) sheet.getRange(i+1, 7).setValue(params.shopShortName);
         found = true;
         break;
       }
